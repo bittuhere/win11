@@ -1255,10 +1255,103 @@
 (function() {
     'use strict';
 
+    // ===== NOTIFICATION TOAST HELPER =====
+    function showSystemNotification(title, message) {
+        const toast = document.createElement('div');
+        toast.className = 'notif-toast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 60px;
+            right: 20px;
+            width: 320px;
+            background: rgba(44, 44, 44, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 16px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            z-index: 10000;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: 'Segoe UI', sans-serif;
+        `;
+        toast.innerHTML = `
+            <div style="font-weight:600; font-size:13px; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                <span style="color:#0078d4; font-size:16px;">🔔</span> ${title}
+            </div>
+            <div style="font-size:12px; color:#ccc; line-height:1.4;">${message}</div>
+        `;
+        document.body.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.style.transform = 'translateX(0)';
+        });
+
+        setTimeout(() => {
+            toast.style.transform = 'translateX(120%)';
+            setTimeout(() => toast.remove(), 400);
+        }, 4000);
+
+        const notifItemsContainer = document.getElementById('notif-items');
+        if (notifItemsContainer) {
+            const el = document.createElement('div');
+            el.className = 'notif-item';
+            el.innerHTML = `<div class="ni-title">${title}</div><div class="ni-body">${message}</div><div class="ni-time">Just now</div>`;
+            notifItemsContainer.insertBefore(el, notifItemsContainer.firstChild);
+        }
+    }
+
     // ===== CONFIG =====
+    // Crisp SVG icons for apps that do not use local asset image files
+    const SVGIcons = {
+        notepad: `
+            <svg viewBox="0 0 32 32" style="width:100%; height:100%; fill:none;">
+                <rect x="6" y="4" width="20" height="24" rx="2" fill="#0078D4"/>
+                <rect x="9" y="8" width="14" height="2" fill="white"/>
+                <rect x="9" y="13" width="14" height="2" fill="white"/>
+                <rect x="9" y="18" width="14" height="2" fill="white"/>
+                <rect x="9" y="23" width="8" height="2" fill="white"/>
+            </svg>
+        `,
+        calculator: `
+            <svg viewBox="0 0 32 32" style="width:100%; height:100%; fill:none;">
+                <rect x="6" y="4" width="20" height="24" rx="2" fill="#4B4B4B" stroke="#8A8A8A" stroke-width="1.5"/>
+                <rect x="9" y="7" width="14" height="6" fill="#1A1A1A"/>
+                <circle cx="10.5" cy="17.5" r="1.5" fill="white"/>
+                <circle cx="16" cy="17.5" r="1.5" fill="white"/>
+                <circle cx="21.5" cy="17.5" r="1.5" fill="#0078D4"/>
+                <circle cx="10.5" cy="22" r="1.5" fill="white"/>
+                <circle cx="16" cy="22" r="1.5" fill="white"/>
+                <circle cx="21.5" cy="22" r="1.5" fill="#0078D4"/>
+                <rect x="9" y="25" width="14" height="1.5" fill="#0078D4"/>
+            </svg>
+        `,
+        maps: `
+            <svg viewBox="0 0 32 32" style="width:100%; height:100%; fill:none;">
+                <path d="M6 6 L14 4 L20 7 L26 5 L26 26 L20 28 L14 25 L6 27 Z" fill="#107C41" opacity="0.85"/>
+                <path d="M14 4 L14 25" stroke="#ffffff" stroke-width="1.5"/>
+                <path d="M20 7 L20 28" stroke="#ffffff" stroke-width="1.5"/>
+                <circle cx="16" cy="12" r="3" fill="#C43E1C"/>
+            </svg>
+        `,
+        recycle: `
+            <svg viewBox="0 0 32 32" style="width:100%; height:100%; fill:none;">
+                <rect x="8" y="10" width="16" height="18" rx="2" fill="#767676"/>
+                <rect x="6" y="6" width="20" height="3" rx="1" fill="#CCCCCC"/>
+                <rect x="12" y="3" width="8" height="3" rx="1" fill="#CCCCCC"/>
+                <line x1="12" y1="13" x2="12" y2="23" stroke="#1A1A1A" stroke-width="2"/>
+                <line x1="16" y1="13" x2="16" y2="23" stroke="#1A1A1A" stroke-width="2"/>
+                <line x1="20" y1="13" x2="20" y2="23" stroke="#1A1A1A" stroke-width="2"/>
+            </svg>
+        `
+    };
+
     function getAppIconHTML(app, size='32px') {
         if (app.iconImg) {
             return `<img src="${app.iconImg}" style="width:${size}; height:${size}; object-fit:contain;" alt="${app.name}">`;
+        } else if (SVGIcons[app.id]) {
+            return `<div style="width:${size}; height:${size}; display:flex; align-items:center; justify-content:center;">${SVGIcons[app.id]}</div>`;
         } else {
             return `<span style="font-size:${size}; line-height:1;">${app.icon}</span>`;
         }
@@ -1388,7 +1481,7 @@
             const el = document.createElement('div');
             el.className = 'desktop-icon';
             const app = APPS.find(a => a.id === item.id);
-            const iconHtml = app ? getAppIconHTML(app, '36px') : `<span style="font-size:36px;">${item.icon}</span>`;
+            const iconHtml = app ? getAppIconHTML(app, '36px') : (item.id === 'recycle' ? getAppIconHTML({ id: 'recycle' }, '36px') : `<span style="font-size:36px;">${item.icon}</span>`);
             el.innerHTML = `<div class="icon" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;">${iconHtml}</div><div class="label">${item.name}</div>`;
             el.addEventListener('dblclick', () => {
                 const app = APPS.find(a => a.id === item.id);
