@@ -1376,6 +1376,10 @@
         { id: 'teams', name: 'Teams', icon: '💬', iconImg: './images/ms-skype.ico', pinned: true, type: 'teams' },
         { id: 'paint', name: 'Paint', icon: '🎨', iconImg: './images/Paint-2D.ico', pinned: true, type: 'paint' },
         { id: 'camera', name: 'Camera', icon: '📷', iconImg: './images/Camera.ico', pinned: true, type: 'camera' },
+        { id: 'snipping', name: 'Snipping Tool', icon: '✂️', pinned: true, type: 'snipping' },
+        { id: 'clipchamp', name: 'Clipchamp', icon: '🎞️', iconImg: './images/ms-video-icon.ico', pinned: true, type: 'clipchamp' },
+        { id: 'onenote', name: 'OneNote', icon: '🟣', iconImg: './images/todo-icon.png', pinned: true, type: 'onenote' },
+        { id: 'mediaplayer', name: 'Media Player', icon: '▶️', iconImg: './images/ms-video-icon.ico', pinned: true, type: 'mediaplayer' }
     ];
 
     const DESKTOP_ICONS = [
@@ -1904,6 +1908,21 @@
             case 'calculator': return getCalculatorContent();
             case 'terminal': return getTerminalContent();
             case 'photos': return getPhotosContent();
+            case 'word': return getWordContent();
+            case 'excel': return getExcelContent();
+            case 'powerpoint': return getPowerPointContent();
+            case 'paint': return getPaintContent();
+            case 'camera': return getCameraContent();
+            case 'music': return getMusicContent();
+            case 'teams': return getTeamsContent();
+            case 'store': return getStoreContent();
+            case 'calendar': return getCalendarContent();
+            case 'mail': return getMailContent();
+            case 'maps': return getMapsContent();
+            case 'snipping': return getSnippingContent();
+            case 'clipchamp': return getClipchampContent();
+            case 'onenote': return getOneNoteContent();
+            case 'mediaplayer': return getMediaPlayerContent();
             default: return getGenericContent(app);
         }
     }
@@ -2148,6 +2167,140 @@ Enjoy your Windows 11 experience! 🎉</textarea>
         `;
     }
 
+    function getSnippingContent() {
+        return `
+            <div class="snipping-body" style="height:100%; background:#202020; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="snipping-toolbar" style="background:#2b2b2b; padding:8px 12px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #3d3d3d; flex-shrink:0;">
+                    <button class="snip-new-btn" style="background:#0078d4; border:none; color:white; padding:6px 14px; border-radius:4px; font-weight:600; font-size:12px; cursor:pointer;">✂️ New Snip</button>
+                    <span style="font-size:11px; color:#aaa;">Mode:</span>
+                    <select class="snip-mode" style="background:#3d3d3d; border:none; color:white; padding:4px; border-radius:4px; font-size:11px; cursor:pointer;">
+                        <option value="rect">Rectangular snip</option>
+                        <option value="free">Freeform snip</option>
+                        <option value="full">Fullscreen snip</option>
+                    </select>
+                    <button class="snip-pen-btn active" data-color="#ff4500" style="background:#ff4500; border:none; width:18px; height:18px; border-radius:50%; cursor:pointer;"></button>
+                    <button class="snip-pen-btn" data-color="#32cd32" style="background:#32cd32; border:none; width:18px; height:18px; border-radius:50%; cursor:pointer;"></button>
+                    <button class="snip-pen-btn" data-color="#ffd700" style="background:#ffd700; border:none; width:18px; height:18px; border-radius:50%; cursor:pointer;"></button>
+                    <button class="snip-save-btn" style="background:#107c41; border:none; color:white; padding:6px 12px; border-radius:4px; font-size:11px; cursor:pointer; margin-left:auto;">Save snip</button>
+                </div>
+                <div class="snipping-view" style="flex:1; background:#111; display:flex; align-items:center; justify-content:center; padding:16px; position:relative; overflow:hidden;">
+                    <!-- Snipping capture preview board -->
+                    <canvas class="snipping-canvas" width="600" height="360" style="background:#2d2d2d; border-radius:4px; box-shadow:0 4px 16px rgba(0,0,0,0.5); cursor:crosshair;"></canvas>
+                    <div class="snipping-overlay-msg" style="position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+                        <span style="font-size:36px;">✂️</span>
+                        <div style="font-size:13px; color:#ccc;">Click New Snip to drag and capture screen area!</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getClipchampContent() {
+        return `
+            <div class="clipchamp-body" style="height:100%; background:#13131c; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="clipchamp-header" style="background:#1e1e2d; padding:12px 20px; display:flex; align-items:center; border-bottom:1px solid #2d2d3d; flex-shrink:0;">
+                    <span style="font-size:16px; font-weight:600; color:#b078ff; display:flex; align-items:center; gap:8px;">🎞️ Microsoft Clipchamp</span>
+                    <button class="clipchamp-export-btn" style="background:#b078ff; border:none; color:white; padding:6px 16px; border-radius:4px; font-weight:600; font-size:11px; cursor:pointer; margin-left:auto;">Export video</button>
+                </div>
+                <div class="clipchamp-editor" style="flex:1; display:flex; overflow:hidden;">
+                    <div class="clipchamp-assets" style="width:160px; background:#181824; border-right:1px solid #2d2d3d; padding:12px; display:flex; flex-direction:column; gap:8px;">
+                        <span style="font-size:10px; color:#888; font-weight:600; text-transform:uppercase;">Media Assets</span>
+                        <div class="clip-asset-item" style="background:#242436; border:1px dashed #444; border-radius:4px; padding:10px; font-size:11px; text-align:center; cursor:pointer;">+ Add media</div>
+                        <div class="clip-asset-list" style="display:flex; flex-direction:column; gap:4px;">
+                            <!-- asset templates -->
+                        </div>
+                    </div>
+                    <div class="clipchamp-workspace" style="flex:1; display:flex; flex-direction:column;">
+                        <div class="clipchamp-preview" style="flex:1; background:#0c0c14; display:flex; align-items:center; justify-content:center; position:relative;">
+                            <!-- Mock video player canvas -->
+                            <div class="clip-player-frame" style="width:80%; aspect-ratio:1.77; background:#13131c; border-radius:6px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; border:1px solid #3d3d5c;">
+                                <div class="clip-text-overlay" style="position:absolute; color:white; font-size:18px; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.8);">My Epic Video</div>
+                                <span class="clip-play-indicator" style="font-size:36px; opacity:0.8; cursor:pointer;">▶</span>
+                            </div>
+                        </div>
+                        <div class="clipchamp-timeline" style="height:140px; background:#181824; border-top:1px solid #2d2d3d; padding:12px; display:flex; flex-direction:column; gap:6px; overflow-y:auto;">
+                            <div style="display:flex; justify-content:between; font-size:10px; color:#888; margin-bottom:4px;">
+                                <span>Timeline tracks</span>
+                                <button class="clip-split-btn" style="background:#242436; border:none; color:white; font-size:9px; padding:2px 6px; border-radius:2px; cursor:pointer;">✂ Split Clip</button>
+                            </div>
+                            <div class="clip-track" style="height:26px; background:rgba(176,120,255,0.15); border:1px solid #b078ff; border-radius:4px; display:flex; align-items:center; padding:0 12px; font-size:11px;">📽️ Video track [Clip1.mp4]</div>
+                            <div class="clip-track" style="height:26px; background:rgba(50,205,50,0.15); border:1px solid #32cd32; border-radius:4px; display:flex; align-items:center; padding:0 12px; font-size:11px;">🎵 Audio track [Music.mp3]</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getOneNoteContent() {
+        return `
+            <div class="onenote-body" style="height:100%; background:#2d2d2d; display:flex; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="onenote-notebooks" style="width:160px; background:#1f1f1f; border-right:1px solid #3d3d3d; padding:12px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size:11px; color:#b078ff; font-weight:600; text-transform:uppercase;">Notebooks</div>
+                    <button class="onenote-add-nb-btn" style="background:#5c2d91; border:none; color:white; padding:4px 0; border-radius:4px; font-size:11px; cursor:pointer; font-weight:600;">+ Notebook</button>
+                    <div class="onenote-nb-list" style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                        <!-- notebooks -->
+                    </div>
+                </div>
+                <div class="onenote-sections" style="width:140px; background:#252525; border-right:1px solid #3d3d3d; padding:12px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size:10px; color:#888; font-weight:600; text-transform:uppercase;">Sections</div>
+                    <button class="onenote-add-sec-btn" style="background:#3d3d3d; border:none; color:white; padding:4px 0; border-radius:4px; font-size:11px; cursor:pointer;">+ Section</button>
+                    <div class="onenote-sec-list" style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                        <!-- sections -->
+                    </div>
+                </div>
+                <div class="onenote-pages-editor" style="flex:1; display:flex; flex-direction:column; background:#2d2d2d;">
+                    <div class="onenote-editor-header" style="padding:12px 20px; background:#222; border-bottom:1px solid #3d3d3d; display:flex; align-items:center; gap:12px;">
+                        <input class="onenote-page-title" value="My Quick Notes" style="background:transparent; border:none; font-size:18px; font-weight:600; color:white; outline:none; flex:1;">
+                        <button class="onenote-save-btn" style="background:#5c2d91; border:none; color:white; padding:6px 16px; border-radius:4px; font-size:11px; cursor:pointer; font-weight:600;">Save notes</button>
+                    </div>
+                    <div class="onenote-textarea-container" style="flex:1; padding:20px; overflow-y:auto;">
+                        <textarea class="onenote-textarea" style="width:100%; height:100%; background:transparent; border:none; color:white; font-size:14px; outline:none; resize:none; font-family:inherit; line-height:1.6;" placeholder="Start writing something..."></textarea>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getMediaPlayerContent() {
+        return `
+            <div class="mediaplayer-body" style="height:100%; background:#111; display:flex; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="mediaplayer-sidebar" style="width:160px; background:#1c1c1c; border-right:1px solid #2d2d2d; padding:12px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="font-size:11px; color:#ff4500; font-weight:600; text-transform:uppercase;">Library</div>
+                    <div class="player-nav-item active" style="font-size:13px; cursor:pointer; color:#ff4500;">📻 Now Playing</div>
+                    <div class="player-nav-item" style="font-size:13px; cursor:pointer; color:#888;">🎵 Music Library</div>
+                    <div class="player-nav-item" style="font-size:13px; cursor:pointer; color:#888;">📽️ Video Library</div>
+                </div>
+                <div class="mediaplayer-main" style="flex:1; display:flex; flex-direction:column; background:#080808;">
+                    <div class="mediaplayer-view" style="flex:1; display:flex; align-items:center; justify-content:center; padding:24px; position:relative; overflow:hidden;">
+                        <!-- Animated player board -->
+                        <div class="player-display" style="width:100%; max-width:440px; aspect-ratio:1.6; background:#1c1c1c; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; border:1px solid #2d2d2d; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+                            <div class="player-disc" style="width:120px; height:120px; border-radius:50%; background:radial-gradient(circle, #333 30%, #111 31%, #ff4500 32%, #111 33%); box-shadow:0 4px 16px rgba(0,0,0,0.5); margin-bottom:16px; transition:transform 0.1s linear; transform:rotate(0deg);"></div>
+                            <h3 class="player-track-title" style="font-size:14px; font-weight:600;">Default Sample Track</h3>
+                            <p class="player-track-artist" style="font-size:11px; color:#888; margin-top:2px;">Windows Media Service</p>
+                        </div>
+                    </div>
+                    <div class="mediaplayer-controls" style="background:#161616; padding:12px 24px; border-top:1px solid #2d2d2d; display:flex; flex-direction:column; gap:8px;">
+                        <div style="display:flex; justify-content:between; align-items:center; font-size:11px; color:#888; gap:12px;">
+                            <span class="player-current-time">0:00</span>
+                            <input class="player-progress-bar" type="range" min="0" max="100" value="0" style="flex:1; height:4px; border-radius:2px; cursor:pointer;">
+                            <span class="player-total-time">3:00</span>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:center; gap:20px; position:relative;">
+                            <button class="player-ctrl-btn btn-player-prev" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;">⏮</button>
+                            <button class="player-ctrl-btn btn-player-play" style="background:#ff4500; border:none; color:white; width:38px; height:38px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">▶</button>
+                            <button class="player-ctrl-btn btn-player-next" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;">⏭</button>
+                            <div style="position:absolute; right:0; display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:14px;">🔊</span>
+                                <input class="player-volume-bar" type="range" min="0" max="100" value="70" style="width:60px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     function getGenericContent(app) {
         return `
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:var(--text-secondary);">
@@ -2163,6 +2316,24 @@ Enjoy your Windows 11 experience! 🎉</textarea>
         if (app.type === 'calculator') initCalculator(winId);
         if (app.type === 'terminal') initTerminal(winId);
         if (app.type === 'notepad') initNotepad(winId);
+        if (app.type === 'browser') initBrowser(winId);
+        if (app.type === 'explorer') initExplorer(winId);
+        if (app.type === 'settings') initSettings(winId);
+        if (app.type === 'word') initWord(winId);
+        if (app.type === 'excel') initExcel(winId);
+        if (app.type === 'powerpoint') initPowerPoint(winId);
+        if (app.type === 'paint') initPaint(winId);
+        if (app.type === 'camera') initCamera(winId);
+        if (app.type === 'music') initMusic(winId);
+        if (app.type === 'teams') initTeams(winId);
+        if (app.type === 'store') initStore(winId);
+        if (app.type === 'calendar') initCalendar(winId);
+        if (app.type === 'mail') initMail(winId);
+        if (app.type === 'maps') initMaps(winId);
+        if (app.type === 'snipping') initSnipping(winId);
+        if (app.type === 'clipchamp') initClipchamp(winId);
+        if (app.type === 'onenote') initOneNote(winId);
+        if (app.type === 'mediaplayer') initMediaPlayer(winId);
     }
 
     function initCalculator(winId) {
@@ -2290,20 +2461,1353 @@ Enjoy your Windows 11 experience! 🎉</textarea>
         const el = document.getElementById(`window-${winId}`);
         if (!el) return;
         const textarea = el.querySelector('.notepad-textarea');
-        const statusbar = el.querySelector('.notepad-statusbar span');
-        if (!textarea || !statusbar) return;
+        const charCountEl = el.querySelector('.np-char-count');
+        const btnSave = el.querySelector('.np-save');
+        const btnDownload = el.querySelector('.np-download');
+        const filenameInput = el.querySelector('.np-filename');
+
+        if (!textarea || !charCountEl) return;
+
+        const updateStatus = () => {
+            const chars = textarea.value.length;
+            const lines = textarea.value.split('\n').length;
+            charCountEl.textContent = `Lines: ${lines} | Chars: ${chars}`;
+        };
 
         textarea.addEventListener('input', updateStatus);
-        textarea.addEventListener('click', updateStatus);
-        textarea.addEventListener('keyup', updateStatus);
 
-        function updateStatus() {
-            const val = textarea.value.substring(0, textarea.selectionStart);
-            const lines = val.split('\n');
-            const ln = lines.length;
-            const col = lines[lines.length - 1].length + 1;
-            statusbar.textContent = `Ln ${ln}, Col ${col}`;
+        btnSave.addEventListener('click', async () => {
+            const filename = filenameInput.value.trim() || 'note.txt';
+            const content = textarea.value;
+
+            try {
+                const res = await fetch('/api/files?action=write', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: filename, content })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showSystemNotification("Notepad", `Successfully saved ${filename} to workspace root!`);
+                } else {
+                    showSystemNotification("Notepad", `Failed to save: ${data.error}`);
+                }
+            } catch (err) {
+                showSystemNotification("Notepad", "Error: Local backend not responding.");
+            }
+        });
+
+        btnDownload.addEventListener('click', () => {
+            const filename = filenameInput.value.trim() || 'note.txt';
+            const blob = new Blob([textarea.value], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        updateStatus();
+    }
+
+    function initBrowser(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const iframe = el.querySelector('.browser-iframe');
+        const urlInput = el.querySelector('.browser-url');
+        const btnBack = el.querySelector('.browser-nav-btn.back');
+        const btnForward = el.querySelector('.browser-nav-btn.forward');
+        const btnRefresh = el.querySelector('.browser-nav-btn.refresh');
+        const tabsContainer = el.querySelector('.browser-tabs');
+        const btnAddTab = el.querySelector('.add-tab-btn');
+
+        let tabHistory = { '1': [] };
+        let currentTabId = '1';
+
+        const loadUrl = (url) => {
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            urlInput.value = url;
+            iframe.src = `/api/proxy?url=${encodeURIComponent(url)}`;
+            tabHistory[currentTabId].push(url);
+        };
+
+        urlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                loadUrl(urlInput.value.trim());
+            }
+        });
+
+        btnBack.addEventListener('click', () => {
+            const history = tabHistory[currentTabId];
+            if (history && history.length > 1) {
+                history.pop();
+                const prev = history[history.length - 1];
+                urlInput.value = prev;
+                iframe.src = `/api/proxy?url=${encodeURIComponent(prev)}`;
+            }
+        });
+
+        btnRefresh.addEventListener('click', () => {
+            iframe.src = iframe.src;
+        });
+
+        tabsContainer.addEventListener('click', (e) => {
+            const tab = e.target.closest('.browser-tab');
+            if (tab && !e.target.classList.contains('close-tab-btn')) {
+                tabsContainer.querySelectorAll('.browser-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentTabId = tab.dataset.tabId;
+                const history = tabHistory[currentTabId];
+                if (history && history.length > 0) {
+                    urlInput.value = history[history.length - 1];
+                    iframe.src = `/api/proxy?url=${encodeURIComponent(history[history.length - 1])}`;
+                }
+            } else if (e.target.classList.contains('close-tab-btn')) {
+                const tab = e.target.closest('.browser-tab');
+                const id = tab.dataset.tabId;
+                tab.remove();
+                delete tabHistory[id];
+                const remaining = tabsContainer.querySelector('.browser-tab');
+                if (remaining) {
+                    remaining.classList.add('active');
+                    currentTabId = remaining.dataset.tabId;
+                    const history = tabHistory[currentTabId];
+                    if (history && history.length > 0) {
+                        urlInput.value = history[history.length - 1];
+                        iframe.src = `/api/proxy?url=${encodeURIComponent(history[history.length - 1])}`;
+                    }
+                }
+            }
+        });
+
+        btnAddTab.addEventListener('click', () => {
+            const newId = String(Date.now());
+            tabHistory[newId] = [];
+            const tabEl = document.createElement('div');
+            tabEl.className = 'browser-tab';
+            tabEl.dataset.tabId = newId;
+            tabEl.style.cssText = 'background:#1f1f1f; padding:6px 16px; border-radius:6px 6px 0 0; font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:white;';
+            tabEl.innerHTML = `
+                <svg viewBox="0 0 16 16" style="width:12px;height:12px;fill:#0078d4;"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 1c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.14-7-7 3.14-7 7-7z"/></svg>
+                <span>New Tab</span>
+                <span class="close-tab-btn" style="opacity:0.6; margin-left:8px; cursor:pointer;">×</span>
+            `;
+            tabsContainer.insertBefore(tabEl, btnAddTab);
+            tabsContainer.querySelectorAll('.browser-tab').forEach(t => t.classList.remove('active'));
+            tabEl.classList.add('active');
+            currentTabId = newId;
+            loadUrl('https://www.bing.com');
+        });
+    }
+
+    function initExplorer(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const grid = el.querySelector('.file-grid');
+        const sidebar = el.querySelector('.file-sidebar');
+        const addressText = el.querySelector('.address-text');
+        const searchInput = el.querySelector('.file-search-input');
+        const btnBack = el.querySelector('.btn-back');
+        const btnNewFolder = el.querySelector('.btn-new-folder');
+        const btnNewFile = el.querySelector('.btn-new-file');
+
+        let currentPath = '';
+
+        const loadFiles = async () => {
+            try {
+                const res = await fetch(`/api/files?action=list&path=${encodeURIComponent(currentPath)}`);
+                const data = await res.json();
+
+                grid.innerHTML = '';
+                addressText.textContent = `This PC > ${currentPath || 'Desktop'}`;
+
+                if (data.files) {
+                    data.files.forEach(file => {
+                        const item = document.createElement('div');
+                        item.className = 'file-item';
+                        item.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 8px; border-radius:4px; cursor:pointer; transition:background 0.1s; position:relative;';
+
+                        let icon = file.is_dir ? '📁' : '📄';
+                        const ext = file.name.split('.').pop().toLowerCase();
+                        if (['jpg', 'jpeg', 'png', 'gif', 'ico'].includes(ext)) {
+                            icon = '🖼️';
+                        } else if (file.name.includes('xlsx')) {
+                            icon = '📊';
+                        } else if (file.name.includes('docx')) {
+                            icon = '📄';
+                        }
+
+                        item.innerHTML = `
+                            <div style="font-size:32px;">${icon}</div>
+                            <div class="fi-name" style="font-size:11px; text-align:center; color:#ccc; word-break:break-all; max-width:80px;">${file.name}</div>
+                            <div class="file-actions-overlay" style="display:none; position:absolute; bottom:2px; right:2px; background:rgba(0,0,0,0.8); border:1px solid #444; border-radius:4px; gap:4px; padding:2px;">
+                                <button class="btn-rename-sub" style="background:#0078d4; border:none; color:white; font-size:9px; padding:1px 4px; border-radius:2px; cursor:pointer;">Rename</button>
+                                <button class="btn-delete-sub" style="background:#c42b1c; border:none; color:white; font-size:9px; padding:1px 4px; border-radius:2px; cursor:pointer;">Del</button>
+                            </div>
+                        `;
+
+                        item.addEventListener('mouseenter', () => {
+                            item.querySelector('.file-actions-overlay').style.display = 'flex';
+                        });
+                        item.addEventListener('mouseleave', () => {
+                            item.querySelector('.file-actions-overlay').style.display = 'none';
+                        });
+
+                        item.querySelector('.btn-rename-sub').addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            const newName = prompt("Enter new name:", file.name);
+                            if (newName && newName.trim()) {
+                                const source = currentPath ? `${currentPath}/${file.name}` : file.name;
+                                const target = currentPath ? `${currentPath}/${newName.trim()}` : newName.trim();
+                                try {
+                                    const r = await fetch('/api/files?action=rename', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ path: source, new_path: target })
+                                    });
+                                    const d = await r.json();
+                                    if (d.success) loadFiles();
+                                } catch (err) { console.log(err); }
+                            }
+                        });
+
+                        item.querySelector('.btn-delete-sub').addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            if (confirm(`Are you sure you want to delete ${file.name}?`)) {
+                                const source = currentPath ? `${currentPath}/${file.name}` : file.name;
+                                try {
+                                    const r = await fetch('/api/files?action=delete', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ path: source })
+                                    });
+                                    const d = await r.json();
+                                    if (d.success) loadFiles();
+                                } catch (err) { console.log(err); }
+                            }
+                        });
+
+                        item.addEventListener('dblclick', async () => {
+                            if (file.is_dir) {
+                                currentPath = currentPath ? `${currentPath}/${file.name}` : file.name;
+                                loadFiles();
+                            } else {
+                                const ext = file.name.split('.').pop().toLowerCase();
+                                if (['txt', 'html', 'json', 'js', 'py', 'sh', 'md', 'xml'].includes(ext)) {
+                                    try {
+                                        const fileRel = currentPath ? `${currentPath}/${file.name}` : file.name;
+                                        const fileRes = await fetch(`/api/files?action=read&path=${encodeURIComponent(fileRel)}`);
+                                        const fileData = await fileRes.json();
+
+                                        const app = APPS.find(a => a.id === 'notepad');
+                                        if (app) {
+                                            openApp(app);
+                                            setTimeout(() => {
+                                                const notepadWin = document.querySelector('.notepad-body');
+                                                if (notepadWin) {
+                                                    notepadWin.querySelector('.notepad-textarea').value = fileData.content;
+                                                    notepadWin.querySelector('.np-filename').value = fileRel;
+                                                    notepadWin.querySelector('.notepad-textarea').dispatchEvent(new Event('input'));
+                                                }
+                                            }, 350);
+                                        }
+                                    } catch (err) { console.log(err); }
+                                } else if (['jpg', 'jpeg', 'png', 'gif', 'ico'].includes(ext)) {
+                                    try {
+                                        const fileRel = currentPath ? `${currentPath}/${file.name}` : file.name;
+                                        const fileRes = await fetch(`/api/files?action=read&path=${encodeURIComponent(fileRel)}`);
+                                        const fileData = await fileRes.json();
+
+                                        const app = APPS.find(a => a.id === 'photos');
+                                        if (app) {
+                                            openApp(app);
+                                            setTimeout(() => {
+                                                const photosWin = document.querySelector('.photos-body');
+                                                if (photosWin) {
+                                                    photosWin.querySelector('.photos-main-image').src = fileData.content;
+                                                }
+                                            }, 350);
+                                        }
+                                    } catch (err) { console.log(err); }
+                                }
+                            }
+                        });
+
+                        grid.appendChild(item);
+                    });
+                }
+            } catch (err) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:24px; color:#f44;">Failed to connect to local workspace API.</div>`;
+            }
+        };
+
+        sidebar.addEventListener('click', (e) => {
+            const item = e.target.closest('.file-sidebar-item');
+            if (item) {
+                sidebar.querySelectorAll('.file-sidebar-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                currentPath = item.dataset.path || '';
+                loadFiles();
+            }
+        });
+
+        btnBack.addEventListener('click', () => {
+            if (currentPath) {
+                const parts = currentPath.split('/');
+                parts.pop();
+                currentPath = parts.join('/');
+                loadFiles();
+            }
+        });
+
+        btnNewFolder.addEventListener('click', async () => {
+            const name = prompt("Enter new folder name:");
+            if (name && name.trim()) {
+                const full = currentPath ? `${currentPath}/${name.trim()}` : name.trim();
+                try {
+                    const res = await fetch('/api/files?action=mkdir', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: full })
+                    });
+                    const d = await res.json();
+                    if (d.success) loadFiles();
+                } catch (err) { console.log(err); }
+            }
+        });
+
+        btnNewFile.addEventListener('click', async () => {
+            const name = prompt("Enter new file name:");
+            if (name && name.trim()) {
+                const full = currentPath ? `${currentPath}/${name.trim()}` : name.trim();
+                try {
+                    const res = await fetch('/api/files?action=write', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: full, content: '' })
+                    });
+                    const d = await res.json();
+                    if (d.success) loadFiles();
+                } catch (err) { console.log(err); }
+            }
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            grid.querySelectorAll('.file-item').forEach(item => {
+                const name = item.querySelector('.fi-name').textContent.toLowerCase();
+                item.style.display = name.includes(val) ? 'flex' : 'none';
+            });
+        });
+
+        loadFiles();
+    }
+
+    function initSettings(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const navItems = el.querySelectorAll('.settings-nav-item');
+        const panels = el.querySelectorAll('.settings-tab-panel');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                const tabName = item.dataset.tab;
+                panels.forEach(panel => {
+                    if (panel.classList.contains(`${tabName}-panel`)) {
+                        panel.style.display = 'block';
+                    } else {
+                        panel.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        const fetchSysInfo = async () => {
+            try {
+                const res = await fetch('/api/sysinfo');
+                const data = await res.json();
+
+                el.querySelector('.sys-hostname').textContent = data.hostname || "DESKTOP-WIN11";
+                el.querySelector('.sys-cpu').textContent = data.cpu || "Intel Core i7-12700H";
+                el.querySelector('.sys-ram').textContent = data.ram || "16.0 GB";
+                el.querySelector('.sys-arch').textContent = data.architecture || "64-bit operating system";
+                el.querySelector('.sys-version').textContent = data.os_version || "23H2";
+                el.querySelector('.sys-release').textContent = data.os_release || "22631.3007";
+            } catch (err) {
+                console.log("Failed to fetch system specifications: ", err);
+            }
+        };
+
+        el.querySelectorAll('.wp-thumbnail').forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                el.querySelectorAll('.wp-thumbnail').forEach(t => t.style.border = '2px solid transparent');
+                thumb.style.border = '2px solid #0078d4';
+                const wpUrl = thumb.dataset.wp;
+                document.getElementById('desktop').style.backgroundImage = `url('${wpUrl}')`;
+                document.getElementById('lock-screen').style.backgroundImage = `url('${wpUrl}')`;
+                document.getElementById('login-screen').style.backgroundImage = `url('${wpUrl}')`;
+            });
+        });
+
+        el.querySelectorAll('.accent-color-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                el.querySelectorAll('.accent-color-dot').forEach(d => d.style.border = '2px solid transparent');
+                dot.style.border = '2px solid white';
+                const color = dot.dataset.color;
+                document.documentElement.style.setProperty('--accent', color);
+            });
+        });
+
+        const nightToggle = el.querySelector('.night-light-toggle');
+        let overlay = document.getElementById('night-light-overlay');
+
+        if (overlay && overlay.style.display === 'block') {
+            nightToggle.classList.add('on');
         }
+
+        nightToggle.addEventListener('click', () => {
+            nightToggle.classList.toggle('on');
+            if (nightToggle.classList.contains('on')) {
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = 'night-light-overlay';
+                    overlay.style.cssText = `
+                        position: fixed; inset: 0; pointer-events: none; z-index: 999999;
+                        background: rgba(240, 160, 40, 0.12);
+                    `;
+                    document.body.appendChild(overlay);
+                } else {
+                    overlay.style.display = 'block';
+                }
+            } else {
+                if (overlay) overlay.style.display = 'none';
+            }
+        });
+
+        fetchSysInfo();
+    }
+
+    function initWord(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const page = el.querySelector('.word-page');
+        const filenameInput = el.querySelector('.word-filename');
+        const btnSave = el.querySelector('.word-save-btn');
+
+        el.querySelectorAll('.word-format-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const cmd = btn.dataset.cmd;
+                document.execCommand(cmd, false, null);
+                page.focus();
+            });
+        });
+
+        const fontSelect = el.querySelector('.word-font-size');
+        fontSelect.addEventListener('change', () => {
+            document.execCommand('fontSize', false, fontSelect.value);
+            page.focus();
+        });
+
+        btnSave.addEventListener('click', async () => {
+            const filename = filenameInput.value.trim() || 'document.docx';
+            const content = page.innerHTML;
+            try {
+                const res = await fetch('/api/files?action=write', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: filename, content })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showSystemNotification("Microsoft Word", `Successfully saved ${filename} to workspace root!`);
+                }
+            } catch (err) {
+                showSystemNotification("Microsoft Word", "Error saving file.");
+            }
+        });
+    }
+
+    function initExcel(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const cells = el.querySelectorAll('.excel-cell');
+        const formulaBar = el.querySelector('.excel-formula-bar');
+        const filenameInput = el.querySelector('.excel-filename');
+        const btnSave = el.querySelector('.excel-save-btn');
+
+        let cellData = {};
+        let activeCellId = null;
+
+        const evaluateFormula = (expr) => {
+            if (!expr.startsWith('=')) return expr;
+            let formula = expr.substring(1).toUpperCase();
+
+            const sumRegex = /SUM\(([^)]+)\)/g;
+            formula = formula.replace(sumRegex, (match, args) => {
+                const parts = args.split(',');
+                let total = 0;
+                parts.forEach(p => {
+                    const val = parseFloat(getCellValue(p.trim()));
+                    if (!isNaN(val)) total += val;
+                });
+                return total;
+            });
+
+            const avgRegex = /AVERAGE\(([^)]+)\)/g;
+            formula = formula.replace(avgRegex, (match, args) => {
+                const parts = args.split(',');
+                let total = 0, count = 0;
+                parts.forEach(p => {
+                    const val = parseFloat(getCellValue(p.trim()));
+                    if (!isNaN(val)) { total += val; count++; }
+                });
+                return count > 0 ? (total / count) : 0;
+            });
+
+            const cellRefRegex = /[A-J][0-9]+/g;
+            formula = formula.replace(cellRefRegex, (cellRef) => {
+                const val = parseFloat(getCellValue(cellRef));
+                return isNaN(val) ? 0 : val;
+            });
+
+            try {
+                const res = Function('"use strict"; return (' + formula + ')')();
+                return typeof res === 'number' ? parseFloat(res.toFixed(6)) : res;
+            } catch (err) {
+                return '#REF!';
+            }
+        };
+
+        const getCellValue = (id) => {
+            const entry = cellData[id];
+            if (!entry) {
+                const input = el.querySelector(`#cell-${id}`);
+                return input ? input.value : "";
+            }
+            return entry.value;
+        };
+
+        const recalculateAll = () => {
+            for (const id in cellData) {
+                if (cellData[id].formula.startsWith('=')) {
+                    cellData[id].value = evaluateFormula(cellData[id].formula);
+                    const input = el.querySelector(`#cell-${id}`);
+                    if (input) input.value = cellData[id].value;
+                }
+            }
+        };
+
+        cells.forEach(cell => {
+            const id = cell.dataset.cellId;
+            cellData[id] = { formula: "", value: "" };
+
+            cell.addEventListener('focus', () => {
+                activeCellId = id;
+                formulaBar.value = cellData[id].formula || cell.value;
+            });
+
+            cell.addEventListener('blur', () => {
+                const val = cell.value;
+                if (!val.startsWith('=')) {
+                    cellData[id].formula = val;
+                    cellData[id].value = val;
+                } else {
+                    cellData[id].formula = val;
+                }
+                recalculateAll();
+            });
+
+            cell.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    cell.blur();
+                }
+            });
+        });
+
+        formulaBar.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && activeCellId) {
+                const val = formulaBar.value;
+                const input = el.querySelector(`#cell-${activeCellId}`);
+                if (input) {
+                    input.value = val;
+                    cellData[activeCellId].formula = val;
+                    if (!val.startsWith('=')) cellData[activeCellId].value = val;
+                    input.blur();
+                }
+            }
+        });
+
+        btnSave.addEventListener('click', async () => {
+            const filename = filenameInput.value.trim() || 'sheet.xlsx';
+            let csvLines = [];
+            for (let r = 1; r <= 15; r++) {
+                let rowVals = [];
+                for (let c = 0; c < 10; c++) {
+                    const id = `${String.fromCharCode(65 + c)}${r}`;
+                    rowVals.push(cellData[id].formula || cellData[id].value || "");
+                }
+                csvLines.push(rowVals.join(','));
+            }
+            const content = csvLines.join('\n');
+            try {
+                const res = await fetch('/api/files?action=write', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: filename, content })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showSystemNotification("Microsoft Excel", `Successfully saved ${filename} to workspace root!`);
+                }
+            } catch (err) {
+                showSystemNotification("Microsoft Excel", "Error saving sheet.");
+            }
+        });
+    }
+
+    function initPowerPoint(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const addBtn = el.querySelector('.pp-add-slide-btn');
+        const presentBtn = el.querySelector('.pp-present-btn');
+        const themeSelect = el.querySelector('.pp-slide-bg');
+        const slidesList = el.querySelector('.pp-slides-list');
+        const slideCard = el.querySelector('.pp-slide-card');
+        const inputTitle = el.querySelector('.pp-slide-title');
+        const inputSubtitle = el.querySelector('.pp-slide-subtitle');
+        const fsPlayer = el.querySelector('.pp-fullscreen-player');
+        const fsSlide = el.querySelector('.pp-fullscreen-slide');
+        const fsTitle = el.querySelector('.pp-player-title');
+        const fsSubtitle = el.querySelector('.pp-player-subtitle');
+
+        let slides = [
+            { title: "My Presentation", subtitle: "Click to edit presentation subtitle", bgColor: "#c43e1c" }
+        ];
+        let activeIdx = 0;
+
+        const refreshWorkspace = () => {
+            const current = slides[activeIdx];
+            inputTitle.value = current.title;
+            inputSubtitle.value = current.subtitle;
+            slideCard.style.background = current.bgColor;
+            themeSelect.value = current.bgColor;
+
+            slidesList.innerHTML = '';
+            slides.forEach((slide, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = `pp-slide-thumb${index === activeIdx ? ' active' : ''}`;
+                thumb.dataset.slideIndex = index;
+                thumb.style.cssText = `width:100%; aspect-ratio:1.6; background:${slide.bgColor}; border:2px solid ${index === activeIdx ? '#0078d4' : 'transparent'}; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px; margin-bottom:8px;`;
+                thumb.textContent = `Slide ${index + 1}`;
+
+                thumb.addEventListener('click', () => {
+                    activeIdx = index;
+                    refreshWorkspace();
+                });
+                slidesList.appendChild(thumb);
+            });
+        };
+
+        inputTitle.addEventListener('input', () => {
+            slides[activeIdx].title = inputTitle.value;
+        });
+
+        inputSubtitle.addEventListener('input', () => {
+            slides[activeIdx].subtitle = inputSubtitle.value;
+        });
+
+        themeSelect.addEventListener('change', () => {
+            slides[activeIdx].bgColor = themeSelect.value;
+            refreshWorkspace();
+        });
+
+        addBtn.addEventListener('click', () => {
+            slides.push({
+                title: "New Slide Title",
+                subtitle: "Subtitle text",
+                bgColor: themeSelect.value
+            });
+            activeIdx = slides.length - 1;
+            refreshWorkspace();
+        });
+
+        let playerIdx = 0;
+        const loadPlayerSlide = () => {
+            const current = slides[playerIdx];
+            fsSlide.style.background = current.bgColor;
+            fsTitle.textContent = current.title;
+            fsSubtitle.textContent = current.subtitle;
+        };
+
+        presentBtn.addEventListener('click', () => {
+            playerIdx = 0;
+            fsPlayer.style.display = 'flex';
+            loadPlayerSlide();
+        });
+
+        el.querySelector('.pp-player-prev').addEventListener('click', () => {
+            if (playerIdx > 0) {
+                playerIdx--;
+                loadPlayerSlide();
+            }
+        });
+
+        el.querySelector('.pp-player-next').addEventListener('click', () => {
+            if (playerIdx < slides.length - 1) {
+                playerIdx++;
+                loadPlayerSlide();
+            }
+        });
+
+        el.querySelector('.pp-player-exit').addEventListener('click', () => {
+            fsPlayer.style.display = 'none';
+        });
+
+        fsPlayer.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fsPlayer.style.display = 'none';
+            }
+        });
+
+        refreshWorkspace();
+    }
+
+    function initPaint(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const canvas = el.querySelector('.paint-canvas');
+        const ctx = canvas.getContext('2d');
+        const colorPicker = el.querySelector('.paint-color-picker');
+        const sizeSlider = el.querySelector('.paint-size-slider');
+        const btnClear = el.querySelector('.paint-clear-btn');
+        const btnSave = el.querySelector('.paint-save-btn');
+
+        let isDrawing = false;
+        let startX, startY;
+        let tool = 'brush';
+        let snapshot;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        el.querySelectorAll('.paint-tool-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                el.querySelectorAll('.paint-tool-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                tool = btn.dataset.tool;
+            });
+        });
+
+        const startDraw = (e) => {
+            isDrawing = true;
+            startX = e.offsetX;
+            startY = e.clientY - canvas.getBoundingClientRect().top;
+            ctx.beginPath();
+            ctx.lineWidth = sizeSlider.value;
+            ctx.strokeStyle = tool === 'eraser' ? '#ffffff' : colorPicker.value;
+            ctx.fillStyle = colorPicker.value;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        };
+
+        const drawing = (e) => {
+            if (!isDrawing) return;
+            const currentY = e.clientY - canvas.getBoundingClientRect().top;
+
+            if (tool === 'brush' || tool === 'eraser') {
+                ctx.lineTo(e.offsetX, currentY);
+                ctx.stroke();
+            } else {
+                ctx.putImageData(snapshot, 0, 0);
+
+                if (tool === 'line') {
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(e.offsetX, currentY);
+                    ctx.stroke();
+                } else if (tool === 'rect') {
+                    ctx.strokeRect(startX, startY, e.offsetX - startX, currentY - startY);
+                } else if (tool === 'circle') {
+                    ctx.beginPath();
+                    const radius = Math.sqrt(Math.pow(startX - e.offsetX, 2) + Math.pow(startY - currentY, 2));
+                    ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
+            }
+        };
+
+        const stopDraw = () => {
+            isDrawing = false;
+        };
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', drawing);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
+
+        btnClear.addEventListener('click', () => {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+
+        btnSave.addEventListener('click', async () => {
+            const dataUrl = canvas.toDataURL('image/png');
+            const base64Content = dataUrl.replace(/^data:image\/png;base64,/, '');
+
+            try {
+                const res = await fetch('/api/files?action=write', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        path: 'images/drawing.png',
+                        content: base64Content,
+                        is_base64: true
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showSystemNotification("Paint", "Successfully saved drawing!");
+                }
+            } catch (err) {
+                showSystemNotification("Paint", "Error saving canvas.");
+            }
+        });
+    }
+
+    function initCamera(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const video = el.querySelector('.camera-stream');
+        const flash = el.querySelector('.camera-flash');
+        const noFeed = el.querySelector('.camera-no-feed');
+        const snapBtn = el.querySelector('.camera-snap-btn');
+
+        let streamInstance = null;
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                streamInstance = stream;
+                video.srcObject = stream;
+                noFeed.style.display = 'none';
+            })
+            .catch(err => {
+                console.log("Webcam declined: ", err);
+            });
+
+        snapBtn.addEventListener('click', async () => {
+            flash.style.opacity = '1';
+            setTimeout(() => { flash.style.opacity = '0'; }, 150);
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 640;
+            tempCanvas.height = 480;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            if (streamInstance) {
+                tempCtx.translate(640, 0);
+                tempCtx.scale(-1, 1);
+                tempCtx.drawImage(video, 0, 0, 640, 480);
+            } else {
+                tempCtx.fillStyle = '#0a0a0c';
+                tempCtx.fillRect(0, 0, 640, 480);
+                tempCtx.fillStyle = '#ffef80';
+                tempCtx.font = '20px sans-serif';
+                tempCtx.fillText("Smile! Windows Camera Snapshot Mock Frame", 100, 240);
+            }
+
+            const dataUrl = tempCanvas.toDataURL('image/png');
+            const base64Content = dataUrl.replace(/^data:image\/png;base64,/, '');
+
+            try {
+                const res = await fetch('/api/files?action=write', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        path: 'images/camera_snap.png',
+                        content: base64Content,
+                        is_base64: true
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showSystemNotification("Camera", "Snapshot saved successfully!");
+                }
+            } catch (err) {
+                showSystemNotification("Camera", "Failed to save snapshot.");
+            }
+        });
+
+        el.querySelector('.win-ctrl-btn.close').addEventListener('click', () => {
+            if (streamInstance) {
+                streamInstance.getTracks().forEach(track => track.stop());
+            }
+        });
+    }
+
+    function initMusic(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const visualizer = el.querySelector('.music-canvas-visualizer');
+        const vCtx = visualizer.getContext('2d');
+        const trackTitle = el.querySelector('.music-current-title');
+        const btnPlay = el.querySelector('.music-ctrl-btn.btn-play');
+        const progress = el.querySelector('.music-progress');
+        const timeCurrent = el.querySelector('.music-time-current');
+
+        let isPlaying = false;
+        let progressVal = 20;
+        let animationFrame;
+
+        const tracks = [
+            "Windows Startup Remix",
+            "Synthwave Odyssey",
+            "Acoustic Lofi Chill"
+        ];
+
+        el.querySelectorAll('.music-track-item').forEach(item => {
+            item.addEventListener('click', () => {
+                el.querySelectorAll('.music-track-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const idx = parseInt(item.dataset.trackId);
+                trackTitle.textContent = tracks[idx];
+                progressVal = 0;
+                progress.value = 0;
+                timeCurrent.textContent = '0:00';
+            });
+        });
+
+        btnPlay.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            btnPlay.textContent = isPlaying ? '⏸' : '▶';
+            btnPlay.style.background = isPlaying ? '#0078d4' : '#eacb64';
+            btnPlay.style.color = isPlaying ? 'white' : 'black';
+
+            if (isPlaying) {
+                animateVisualizer();
+            } else {
+                cancelAnimationFrame(animationFrame);
+                vCtx.clearRect(0, 0, visualizer.width, visualizer.height);
+            }
+        });
+
+        const animateVisualizer = () => {
+            vCtx.clearRect(0, 0, visualizer.width, visualizer.height);
+            vCtx.fillStyle = '#eacb64';
+
+            for (let i = 0; i < 24; i++) {
+                const height = Math.random() * (visualizer.height - 10);
+                const x = i * 13 + 4;
+                vCtx.fillRect(x, visualizer.height - height, 8, height);
+            }
+
+            progressVal = (progressVal + 0.1) % 100;
+            progress.value = Math.floor(progressVal);
+
+            const minutes = Math.floor((progressVal * 2.2) / 60);
+            const seconds = Math.floor((progressVal * 2.2) % 60);
+            timeCurrent.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            animationFrame = requestAnimationFrame(animateVisualizer);
+        };
+    }
+
+    function initPhotos(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const mainImg = el.querySelector('.photos-main-image');
+        const btnRotate = el.querySelector('.photos-rotate-btn');
+        const btnPrev = el.querySelector('.photos-prev-btn');
+        const btnNext = el.querySelector('.photos-next-btn');
+
+        let currentRotation = 0;
+        let photoIndex = 0;
+
+        btnRotate.addEventListener('click', () => {
+            currentRotation = (currentRotation + 90) % 360;
+            mainImg.style.transform = `rotate(${currentRotation}deg)`;
+        });
+
+        const changePhoto = (direction) => {
+            photoIndex = (photoIndex + direction + PHOTO_URLS.length) % PHOTO_URLS.length;
+            mainImg.style.transform = 'rotate(0deg)';
+            currentRotation = 0;
+            mainImg.src = PHOTO_URLS[photoIndex];
+        };
+
+        btnPrev.addEventListener('click', () => changePhoto(-1));
+        btnNext.addEventListener('click', () => changePhoto(1));
+    }
+
+    function initTeams(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const msgContainer = el.querySelector('.teams-messages');
+        const input = el.querySelector('.teams-input');
+        const sendBtn = el.querySelector('.teams-send-btn');
+
+        const sendMessage = () => {
+            const txt = input.value.trim();
+            if (!txt) return;
+            input.value = '';
+
+            const userMsg = document.createElement('div');
+            userMsg.style.cssText = 'display:flex; gap:8px; justify-content:flex-end;';
+            userMsg.innerHTML = `
+                <div style="background:#0078d4; padding:8px 12px; border-radius:8px 0 8px 8px; font-size:13px; max-width:80%; color:white;">
+                    ${txt}
+                </div>
+                <div style="width:28px; height:28px; border-radius:50%; background:#888; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">U</div>
+            `;
+            msgContainer.appendChild(userMsg);
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.style.cssText = 'display:flex; gap:8px;';
+
+                let answer = `Regarding '${txt}', Windows 11 features seamless multi-tasking and premium hardware acceleration.`;
+                if (txt.toLowerCase().includes('hello') || txt.toLowerCase().includes('hi')) {
+                    answer = "Hi! I am Copilot assistant. Let me know what you'd like to explore in this system!";
+                }
+
+                aiMsg.innerHTML = `
+                    <div style="width:28px; height:28px; border-radius:50%; background:#6264a7; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">AI</div>
+                    <div style="background:#2d2d2d; padding:8px 12px; border-radius:0 8px 8px 8px; font-size:13px; max-width:80%;">
+                        ${answer}
+                    </div>
+                `;
+                msgContainer.appendChild(aiMsg);
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            }, 1000);
+        };
+
+        sendBtn.addEventListener('click', sendMessage);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    }
+
+    function initStore(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+
+        el.querySelectorAll('.store-install-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const appId = btn.dataset.appId;
+                btn.textContent = "Installing...";
+                btn.style.background = "#555";
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    btn.textContent = "Installed";
+                    btn.style.background = "#107c41";
+
+                    let appName = "VS Code";
+                    let appIcon = "🤖";
+                    if (appId === 'whiteboard') { appName = "Whiteboard"; appIcon = "📝"; }
+
+                    const shortcut = document.createElement('div');
+                    shortcut.className = 'desktop-icon';
+                    shortcut.innerHTML = `<div class="icon" style="font-size:36px; display:flex; align-items:center; justify-content:center;">${appIcon}</div><div class="label" style="font-size:11px; color:white; text-align:center;">${appName}</div>`;
+
+                    shortcut.addEventListener('dblclick', () => {
+                        showSystemNotification(appName, `Launching ${appName}...`);
+                    });
+
+                    document.getElementById('desktop-icons').appendChild(shortcut);
+
+                    const pinnedApp = document.createElement('div');
+                    pinnedApp.className = 'start-app-item';
+                    pinnedApp.innerHTML = `<div class="app-icon">${appIcon}</div><div class="app-name">${appName}</div>`;
+                    pinnedApp.addEventListener('click', () => {
+                        showSystemNotification(appName, `Launching ${appName}...`);
+                        closeAllPanels();
+                    });
+                    document.getElementById('start-apps-grid').appendChild(pinnedApp);
+
+                    showSystemNotification("Microsoft Store", `${appName} installed successfully!`);
+                }, 1500);
+            });
+        });
+    }
+
+    function initCalendar(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const grid = el.querySelector('.calendar-days-grid');
+        const noteInput = el.querySelector('.cal-note-input');
+        const noteSave = el.querySelector('.cal-note-save-btn');
+
+        let selectedDay = null;
+        let dayEvents = {};
+
+        const renderDays = () => {
+            grid.innerHTML = '';
+            for (let i = 1; i <= 31; i++) {
+                const day = document.createElement('div');
+                day.style.cssText = `
+                    background: #252525; border: 1px solid #333; border-radius: 4px;
+                    padding: 4px; cursor: pointer; display: flex; flex-direction: column;
+                    justify-content: space-between; font-size: 11px;
+                `;
+                day.innerHTML = `<div style="font-weight:600;">${i}</div>`;
+
+                if (dayEvents[i]) {
+                    const preview = document.createElement('div');
+                    preview.style.cssText = 'font-size:9px; background:#0078d4; color:white; padding:1px 4px; border-radius:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:2px;';
+                    preview.textContent = dayEvents[i];
+                    day.appendChild(preview);
+                }
+
+                if (i === selectedDay) {
+                    day.style.border = '2px solid #0078d4';
+                }
+
+                day.addEventListener('click', () => {
+                    selectedDay = i;
+                    noteInput.value = dayEvents[i] || '';
+                    renderDays();
+                });
+
+                grid.appendChild(day);
+            }
+        };
+
+        noteSave.addEventListener('click', () => {
+            if (selectedDay) {
+                dayEvents[selectedDay] = noteInput.value.trim();
+                renderDays();
+                showSystemNotification("Calendar", `Saved event for Day ${selectedDay}!`);
+            }
+        });
+
+        renderDays();
+    }
+
+    function initMail(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const composeBtn = el.querySelector('.mail-compose-btn');
+        const sendBtn = el.querySelector('.mail-send-btn');
+        const mailItems = el.querySelectorAll('.mail-item');
+        const viewPanel = el.querySelector('.mail-view-panel');
+        const composePanel = el.querySelector('.mail-compose-panel');
+
+        composeBtn.addEventListener('click', () => {
+            viewPanel.style.display = 'none';
+            composePanel.style.display = 'flex';
+        });
+
+        sendBtn.addEventListener('click', () => {
+            const to = el.querySelector('.mail-to').value.trim();
+            if (!to) return;
+            el.querySelector('.mail-to').value = '';
+            el.querySelector('.mail-subj').value = '';
+            el.querySelector('.mail-text').value = '';
+            composePanel.style.display = 'none';
+            viewPanel.style.display = 'block';
+            showSystemNotification("Outlook Mail", `Email sent to ${to}!`);
+        });
+
+        mailItems.forEach((item, idx) => {
+            item.addEventListener('click', () => {
+                mailItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                composePanel.style.display = 'none';
+                viewPanel.style.display = 'block';
+            });
+        });
+    }
+
+    function initMaps(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const searchInput = el.querySelector('.maps-address');
+        const searchBtn = el.querySelector('.maps-search-btn');
+        const label = el.querySelector('.maps-label');
+
+        searchBtn.addEventListener('click', () => {
+            const loc = searchInput.value.trim() || 'New York City';
+            label.textContent = loc;
+            showSystemNotification("Maps", `Navigated to ${loc}!`);
+        });
+    }
+
+    function initSnipping(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const canvas = el.querySelector('.snipping-canvas');
+        const ctx = canvas.getContext('2d');
+        const btnNew = el.querySelector('.snip-new-btn');
+        const btnSave = el.querySelector('.snip-save-btn');
+        const overlay = el.querySelector('.snipping-overlay-msg');
+
+        let isSnipping = false;
+        let activeColor = '#ff4500';
+
+        ctx.fillStyle = '#1e1e2d';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        el.querySelectorAll('.snip-pen-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                el.querySelectorAll('.snip-pen-btn').forEach(b => b.style.border = 'none');
+                btn.style.border = '2px solid white';
+                activeColor = btn.dataset.color;
+            });
+        });
+
+        btnNew.addEventListener('click', () => {
+            overlay.style.display = 'none';
+            ctx.fillStyle = '#2d2d2d';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw dummy captured screen mockup visually!
+            ctx.fillStyle = '#0078d4';
+            ctx.fillRect(100, 80, 400, 200);
+            ctx.fillStyle = 'white';
+            ctx.font = '16px sans-serif';
+            ctx.fillText("Windows 11 Snip Area Capture Mockup", 140, 180);
+            showSystemNotification("Snipping Tool", "Captured active screen segment. You can annotate with colored pens!");
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            isSnipping = true;
+            ctx.beginPath();
+            ctx.strokeStyle = activeColor;
+            ctx.lineWidth = 3;
+            ctx.moveTo(e.offsetX, e.clientY - canvas.getBoundingClientRect().top);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isSnipping) return;
+            ctx.lineTo(e.offsetX, e.clientY - canvas.getBoundingClientRect().top);
+            ctx.stroke();
+        });
+
+        canvas.addEventListener('mouseup', () => { isSnipping = false; });
+
+        btnSave.addEventListener('click', () => {
+            showSystemNotification("Snipping Tool", "Saved capture snip successfully!");
+        });
+    }
+
+    function initClipchamp(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const playBtn = el.querySelector('.clip-play-indicator');
+        const textOverlay = el.querySelector('.clip-text-overlay');
+        const exportBtn = el.querySelector('.clipchamp-export-btn');
+
+        let isPlaying = false;
+
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            playBtn.textContent = isPlaying ? '⏸' : '▶';
+            if (isPlaying) {
+                textOverlay.textContent = "Playing Timeline Video...";
+                textOverlay.style.color = '#ff4500';
+            } else {
+                textOverlay.textContent = "My Epic Video";
+                textOverlay.style.color = 'white';
+            }
+        });
+
+        exportBtn.addEventListener('click', () => {
+            showSystemNotification("Clipchamp Editor", "Exporting high-fidelity video file to workspace Downloads...");
+        });
+    }
+
+    function initOneNote(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const nbList = el.querySelector('.onenote-nb-list');
+        const secList = el.querySelector('.onenote-sec-list');
+        const titleInput = el.querySelector('.onenote-page-title');
+        const textarea = el.querySelector('.onenote-textarea');
+        const saveBtn = el.querySelector('.onenote-save-btn');
+        const addNbBtn = el.querySelector('.onenote-add-nb-btn');
+        const addSecBtn = el.querySelector('.onenote-add-sec-btn');
+
+        let notebooks = ["Personal Notes", "Work Drafts"];
+        let sections = ["Quick ideas", "Project design"];
+
+        const renderLists = () => {
+            nbList.innerHTML = '';
+            notebooks.forEach(nb => {
+                const item = document.createElement('div');
+                item.style.cssText = 'padding:6px; font-size:12px; cursor:pointer; background:rgba(255,255,255,0.06); border-radius:4px; margin-bottom:4px;';
+                item.textContent = nb;
+                nbList.appendChild(item);
+            });
+
+            secList.innerHTML = '';
+            sections.forEach(sec => {
+                const item = document.createElement('div');
+                item.style.cssText = 'padding:6px; font-size:12px; cursor:pointer; background:rgba(255,255,255,0.06); border-radius:4px; margin-bottom:4px;';
+                item.textContent = sec;
+                secList.appendChild(item);
+            });
+        };
+
+        addNbBtn.addEventListener('click', () => {
+            const name = prompt("Enter notebook name:");
+            if (name && name.trim()) {
+                notebooks.push(name.trim());
+                renderLists();
+            }
+        });
+
+        addSecBtn.addEventListener('click', () => {
+            const name = prompt("Enter section name:");
+            if (name && name.trim()) {
+                sections.push(name.trim());
+                renderLists();
+            }
+        });
+
+        saveBtn.addEventListener('click', () => {
+            showSystemNotification("OneNote", `Saved note "${titleInput.value}" successfully!`);
+        });
+
+        renderLists();
+    }
+
+    function initMediaPlayer(winId) {
+        const el = document.getElementById(`window-${winId}`);
+        if (!el) return;
+        const disc = el.querySelector('.player-disc');
+        const playBtn = el.querySelector('.btn-player-play');
+        const progress = el.querySelector('.player-progress-bar');
+        const curTime = el.querySelector('.player-current-time');
+
+        let isPlaying = false;
+        let progressVal = 0;
+        let timer;
+
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            playBtn.textContent = isPlaying ? '⏸' : '▶';
+
+            if (isPlaying) {
+                disc.style.animation = 'spin 3s linear infinite';
+                timer = setInterval(() => {
+                    progressVal = (progressVal + 1) % 100;
+                    progress.value = progressVal;
+                    const mins = Math.floor((progressVal * 1.8) / 60);
+                    const secs = Math.floor((progressVal * 1.8) % 60);
+                    curTime.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                }, 1000);
+            } else {
+                disc.style.animation = 'none';
+                clearInterval(timer);
+            }
+        });
     }
 
     // ===== WIDGETS =====
