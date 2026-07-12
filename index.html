@@ -33,6 +33,19 @@
             user-select: none;
             cursor: default;
         }
+        body.light-theme {
+            --glass-bg: rgba(243, 243, 243, 0.85);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-border-light: rgba(0, 0, 0, 0.12);
+            --hover-bg: rgba(0, 0, 0, 0.06);
+            --active-bg: rgba(0, 0, 0, 0.04);
+            --text-primary: #000000;
+            --text-secondary: rgba(0, 0, 0, 0.7);
+            --text-tertiary: rgba(0, 0, 0, 0.5);
+            --start-bg: rgba(243, 243, 243, 0.95);
+            --search-bg: rgba(240, 240, 240, 0.98);
+            --widget-bg: rgba(243, 243, 250, 0.9);
+        }
 
         /* ===== LOCK SCREEN ===== */
         #lock-screen {
@@ -1998,75 +2011,82 @@
 
     function getSettingsContent() {
         return `
-            <div class="settings-layout">
-                <div class="settings-sidebar">
-                    <div class="settings-sidebar-title">Settings</div>
-                    <div class="settings-nav-item active"><span class="sni-icon">🏠</span>System</div>
-                    <div class="settings-nav-item"><span class="sni-icon">📱</span>Bluetooth & devices</div>
-                    <div class="settings-nav-item"><span class="sni-icon">🌐</span>Network & internet</div>
-                    <div class="settings-nav-item"><span class="sni-icon">🎨</span>Personalization</div>
-                    <div class="settings-nav-item"><span class="sni-icon">📦</span>Apps</div>
-                    <div class="settings-nav-item"><span class="sni-icon">👤</span>Accounts</div>
-                    <div class="settings-nav-item"><span class="sni-icon">⏰</span>Time & language</div>
-                    <div class="settings-nav-item"><span class="sni-icon">🎮</span>Gaming</div>
-                    <div class="settings-nav-item"><span class="sni-icon">♿</span>Accessibility</div>
-                    <div class="settings-nav-item"><span class="sni-icon">🔒</span>Privacy & security</div>
-                    <div class="settings-nav-item"><span class="sni-icon">🔄</span>Windows Update</div>
+            <div class="settings-layout" style="display:flex; height:100%; background:#1c1c1c; color:white;">
+                <div class="settings-sidebar" style="width:220px; background:#202020; border-right:1px solid #2d2d2d; padding:16px 0; display:flex; flex-direction:column;">
+                    <div class="settings-sidebar-title" style="font-size:18px; font-weight:600; padding:0 20px; margin-bottom:16px;">Settings</div>
+                    <div class="settings-nav-item active" data-tab="system" style="display:flex; align-items:center; gap:12px; padding:10px 20px; cursor:pointer; font-size:13px; transition:background 0.2s;"><span style="font-size:16px;">💻</span>System</div>
+                    <div class="settings-nav-item" data-tab="personalization" style="display:flex; align-items:center; gap:12px; padding:10px 20px; cursor:pointer; font-size:13px; transition:background 0.2s;"><span style="font-size:16px;">🎨</span>Personalization</div>
+                    <div class="settings-nav-item" data-tab="update" style="display:flex; align-items:center; gap:12px; padding:10px 20px; cursor:pointer; font-size:13px; transition:background 0.2s;"><span style="font-size:16px;">🔄</span>Windows Update</div>
                 </div>
-                <div class="settings-content">
-                    <h2>System</h2>
-                    <div class="settings-card">
-                        <div class="settings-row">
-                            <div class="settings-row-left">
-                                <span class="sr-icon">🖥️</span>
-                                <div class="sr-info"><div class="sr-title">Display</div><div class="sr-desc">Multiple displays, brightness, night light</div></div>
+                <div class="settings-content" style="flex:1; padding:24px 32px; overflow-y:auto;">
+                    <!-- System Tab (default) -->
+                    <div class="settings-tab-panel system-panel">
+                        <h2 style="font-size:22px; font-weight:600; margin-bottom:16px;">System Information</h2>
+                        <div class="settings-card" style="background:#2b2b2b; border:1px solid #3a3a3a; border-radius:8px; padding:16px; margin-bottom:12px;">
+                            <div style="font-size:14px; font-weight:500; margin-bottom:12px; color:#ccc;">Device Specifications</div>
+                            <div style="display:grid; grid-template-columns:120px 1fr; gap:8px; font-size:13px;">
+                                <div style="color:#888;">Device Name:</div><div class="sys-hostname">DESKTOP-WIN11</div>
+                                <div style="color:#888;">Processor:</div><div class="sys-cpu">Fetching CPU...</div>
+                                <div style="color:#888;">Installed RAM:</div><div class="sys-ram">Fetching RAM...</div>
+                                <div style="color:#888;">System Type:</div><div class="sys-arch">64-bit operating system</div>
                             </div>
-                            <span style="color:var(--text-tertiary)">›</span>
+                        </div>
+                        <div class="settings-card" style="background:#2b2b2b; border:1px solid #3a3a3a; border-radius:8px; padding:16px; margin-bottom:12px;">
+                            <div style="font-size:14px; font-weight:500; margin-bottom:12px; color:#ccc;">Windows Specifications</div>
+                            <div style="display:grid; grid-template-columns:120px 1fr; gap:8px; font-size:13px;">
+                                <div style="color:#888;">Edition:</div><div>Windows 11 Pro Web Edition</div>
+                                <div style="color:#888;">Version:</div><div class="sys-version">23H2</div>
+                                <div style="color:#888;">OS Build:</div><div class="sys-release">22631.3007</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="settings-card">
-                        <div class="settings-row">
-                            <div class="settings-row-left">
-                                <span class="sr-icon">🔊</span>
-                                <div class="sr-info"><div class="sr-title">Sound</div><div class="sr-desc">Volume levels, output, input</div></div>
+                    <!-- Personalization Tab -->
+                    <div class="settings-tab-panel personalization-panel" style="display:none;">
+                        <h2 style="font-size:22px; font-weight:600; margin-bottom:16px;">Personalization</h2>
+                        <div class="settings-card" style="background:#2b2b2b; border:1px solid #3a3a3a; border-radius:8px; padding:16px; margin-bottom:12px;">
+                            <div style="font-size:14px; font-weight:500; margin-bottom:12px; color:#ccc;">Select Wallpaper</div>
+                            <div class="wallpaper-chooser" style="display:flex; gap:12px;">
+                                <div class="wp-thumbnail" data-wp="./images/1dark.jpg" style="width:120px; height:75px; border-radius:6px; background:url('./images/1dark.jpg') center/cover; cursor:pointer; border:2px solid #0078d4;"></div>
+                                <div class="wp-thumbnail" data-wp="./images/0light.jpg" style="width:120px; height:75px; border-radius:6px; background:url('./images/0light.jpg') center/cover; cursor:pointer; border:2px solid transparent;"></div>
                             </div>
-                            <span style="color:var(--text-tertiary)">›</span>
+                        </div>
+                        <div class="settings-card" style="background:#2b2b2b; border:1px solid #3a3a3a; border-radius:8px; padding:16px; margin-bottom:12px;">
+                            <div style="font-size:14px; font-weight:500; margin-bottom:12px; color:#ccc;">Theme Color Mode</div>
+                            <div style="display:flex; align-items:center; justify-content:space-between;">
+                                <div>
+                                    <div style="font-size:14px;">Toggle Light / Dark mode</div>
+                                    <div style="font-size:11px; color:#888;">Inverts visual system windows colors</div>
+                                </div>
+                                <div class="toggle-switch theme-mode-toggle"></div>
+                            </div>
+                        </div>
+                        <div class="settings-card" style="background:#2b2b2b; border:1px solid #3a3a3a; border-radius:8px; padding:16px; margin-bottom:12px;">
+                            <div style="font-size:14px; font-weight:500; margin-bottom:12px; color:#ccc;">Accent Color</div>
+                            <div class="accent-chooser" style="display:flex; gap:8px;">
+                                <div class="accent-color-dot" data-color="#0078d4" style="width:24px; height:24px; border-radius:50%; background:#0078d4; cursor:pointer; border:2px solid white;"></div>
+                                <div class="accent-color-dot" data-color="#ff4500" style="width:24px; height:24px; border-radius:50%; background:#ff4500; cursor:pointer; border:2px solid transparent;"></div>
+                                <div class="accent-color-dot" data-color="#32cd32" style="width:24px; height:24px; border-radius:50%; background:#32cd32; cursor:pointer; border:2px solid transparent;"></div>
+                                <div class="accent-color-dot" data-color="#8a2be2" style="width:24px; height:24px; border-radius:50%; background:#8a2be2; cursor:pointer; border:2px solid transparent;"></div>
+                            </div>
+                        </div>
+                        <div class="settings-card" style="background:#2b2b2b; border:1px solid #3a3a3a; border-radius:8px; padding:16px; margin-bottom:12px;">
+                            <div style="display:flex; justify-content:between; align-items:center;">
+                                <div>
+                                    <div style="font-size:14px; font-weight:500; color:#ccc;">Night Light</div>
+                                    <div style="font-size:12px; color:#888;">Warm colors to helper you sleep</div>
+                                </div>
+                                <div class="toggle-switch night-light-toggle" style="margin-left:auto;"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="settings-card">
-                        <div class="settings-row">
-                            <div class="settings-row-left">
-                                <span class="sr-icon">🔔</span>
-                                <div class="sr-info"><div class="sr-title">Notifications</div><div class="sr-desc">Alerts from apps and system</div></div>
-                            </div>
-                            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
-                        </div>
-                    </div>
-                    <div class="settings-card">
-                        <div class="settings-row">
-                            <div class="settings-row-left">
-                                <span class="sr-icon">🔋</span>
-                                <div class="sr-info"><div class="sr-title">Power & battery</div><div class="sr-desc">Battery levels, power saver, usage</div></div>
-                            </div>
-                            <span style="color:var(--text-tertiary)">›</span>
-                        </div>
-                    </div>
-                    <div class="settings-card">
-                        <div class="settings-row">
-                            <div class="settings-row-left">
-                                <span class="sr-icon">💾</span>
-                                <div class="sr-info"><div class="sr-title">Storage</div><div class="sr-desc">Storage spaces, drives, config rules</div></div>
-                            </div>
-                            <span style="color:var(--text-tertiary)">›</span>
-                        </div>
-                    </div>
-                    <div class="settings-card">
-                        <div class="settings-row">
-                            <div class="settings-row-left">
-                                <span class="sr-icon">🌙</span>
-                                <div class="sr-info"><div class="sr-title">Night light</div><div class="sr-desc">Warmer colors to help you sleep</div></div>
-                            </div>
-                            <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+                    <!-- Update Tab -->
+                    <div class="settings-tab-panel update-panel" style="display:none;">
+                        <h2 style="font-size:22px; font-weight:600; margin-bottom:16px;">Windows Update</h2>
+                        <div class="settings-card" style="background:#2b2b2b; border:1px solid #3a3a3a; border-radius:8px; padding:24px; text-align:center;">
+                            <div style="font-size:48px; margin-bottom:12px;" class="update-icon-box">🔄</div>
+                            <h3 style="font-size:16px; font-weight:600; margin-bottom:8px;" class="update-status-title">You're up to date</h3>
+                            <p style="font-size:12px; color:#888; margin-bottom:16px;" class="update-status-desc">Last checked: Today, 10:45 AM</p>
+                            <button class="check-update-btn" style="background:#0078d4; border:none; color:white; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:13px;">Check for updates</button>
                         </div>
                     </div>
                 </div>
@@ -2600,6 +2620,15 @@ Enjoy your Windows 11 experience! 🎉</textarea>
             currentTabId = newId;
             loadUrl('https://www.bing.com');
         });
+
+        // Click handlers for home page shortcut tiles
+        el.querySelectorAll('.browser-shortcut').forEach(shortcut => {
+            shortcut.addEventListener('click', () => {
+                const name = shortcut.querySelector('.bs-name').textContent.toLowerCase();
+                const url = `https://www.${name}.com`;
+                loadUrl(url);
+            });
+        });
     }
 
     function initExplorer(winId) {
@@ -2863,6 +2892,22 @@ Enjoy your Windows 11 experience! 🎉</textarea>
             });
         });
 
+        // Global Theme Mode Switch (Light / Dark)
+        const themeToggle = el.querySelector('.theme-mode-toggle');
+        if (document.body.classList.contains('light-theme')) {
+            themeToggle.classList.add('on');
+        }
+        themeToggle.addEventListener('click', () => {
+            themeToggle.classList.toggle('on');
+            if (themeToggle.classList.contains('on')) {
+                document.body.classList.add('light-theme');
+                showSystemNotification("Personalization", "Switched to Windows 11 Light Theme");
+            } else {
+                document.body.classList.remove('light-theme');
+                showSystemNotification("Personalization", "Switched to Windows 11 Dark Theme");
+            }
+        });
+
         const nightToggle = el.querySelector('.night-light-toggle');
         let overlay = document.getElementById('night-light-overlay');
 
@@ -2887,6 +2932,33 @@ Enjoy your Windows 11 experience! 🎉</textarea>
             } else {
                 if (overlay) overlay.style.display = 'none';
             }
+        });
+
+        // Windows Update checking simulator
+        const checkUpdateBtn = el.querySelector('.check-update-btn');
+        const updateIconBox = el.querySelector('.update-icon-box');
+        const updateTitle = el.querySelector('.update-status-title');
+        const updateDesc = el.querySelector('.update-status-desc');
+
+        checkUpdateBtn.addEventListener('click', () => {
+            checkUpdateBtn.disabled = true;
+            checkUpdateBtn.textContent = "Checking...";
+            updateTitle.textContent = "Checking for updates...";
+            updateDesc.textContent = "Please stand by while we contact Windows Update servers.";
+
+            // spin rotation animation on icon box
+            updateIconBox.style.transition = 'transform 2s ease-in-out';
+            updateIconBox.style.transform = 'rotate(720deg)';
+
+            setTimeout(() => {
+                checkUpdateBtn.disabled = false;
+                checkUpdateBtn.textContent = "Check for updates";
+                updateTitle.textContent = "Your device is up to date";
+                updateDesc.textContent = "Last checked: Just now";
+                updateIconBox.style.transition = 'none';
+                updateIconBox.style.transform = 'rotate(0deg)';
+                showSystemNotification("Windows Update", "All system libraries and core packages are fully updated!");
+            }, 2000);
         });
 
         fetchSysInfo();
