@@ -1268,6 +1268,170 @@
 (function() {
     'use strict';
 
+    // ===== INDEXEDDB VIRTUAL FILE SYSTEM (VFS) =====
+    class W11VirtualFS {
+        constructor() {
+            this.dbName = 'W11VFS';
+            this.dbVersion = 1;
+            this.db = null;
+        }
+
+        init() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(this.dbName, this.dbVersion);
+
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('files')) {
+                        db.createObjectStore('files', { keyPath: 'path' });
+                    }
+                };
+
+                request.onsuccess = async (e) => {
+                    this.db = e.target.result;
+                    await this.prepopulateDefaults();
+                    resolve();
+                };
+
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async prepopulateDefaults() {
+            const count = await this.countFiles();
+            if (count === 0) {
+                // Populate high fidelity system workspace files
+                const defaults = [
+                    { path: 'readme.txt', content: 'Welcome to Windows 11 Web Edition!\n\nThis system is fully powered by a robust client-side IndexedDB Virtual File System (VFS) combined with a local Python 3 backend.\n\nAll your office files, notepad notes, drawings, and custom applications are safely saved inside your browser storage.\n\nEnjoy!', is_dir: false, size: 280 },
+                    { path: 'Documents', content: '', is_dir: true, size: 0 },
+                    { path: 'Documents/meeting.docx', content: '<h2>Project Kickstarter Minutes</h2><p>Our team is building an ultimate visual clone of Windows 11. Core applications such as Word, Excel, PowerPoint, OneNote, and Paint are completely operational.</p>', is_dir: false, size: 195 },
+                    { path: 'Documents/sales.xlsx', content: 'A1,B1,C1\nMonths,Sales,Costs\nJanuary,12000,8000\nFebruary,15000,9500\n=SUM(B3,B4),=SUM(C3,C4),', is_dir: false, size: 85 },
+                    { path: 'Pictures', content: '', is_dir: true, size: 0 },
+                    { path: 'Pictures/drawing.png', content: '', is_dir: false, size: 0 },
+                    { path: 'Downloads', content: '', is_dir: true, size: 0 }
+                ];
+                for (const file of defaults) {
+                    await this.write(file.path, file.content, file.is_dir, file.size);
+                }
+            }
+        }
+
+        countFiles() {
+            return new Promise((resolve) => {
+                const tx = this.db.transaction('files', 'readonly');
+                const store = tx.objectStore('files');
+                const req = store.count();
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => resolve(0);
+            });
+        }
+
+        list(dirPath) {
+            return new Promise((resolve) => {
+                const tx = this.db.transaction('files', 'readonly');
+                const store = tx.objectStore('files');
+                const req = store.getAll();
+
+                req.onsuccess = () => {
+                    const all = req.result;
+                    // Filter files that are direct children of dirPath
+                    const result = [];
+                    all.forEach(file => {
+                        if (file.path === dirPath) return; // skip self
+
+                        let parent = '';
+                        const parts = file.path.split('/');
+                        if (parts.length > 1) {
+                            parts.pop();
+                            parent = parts.join('/');
+                        }
+
+                        if (parent === dirPath) {
+                            result.push({
+                                name: file.path.split('/').pop(),
+                                path: file.path,
+                                is_dir: file.is_dir,
+                                size: file.size || 0
+                            });
+                        }
+                    });
+
+                    // Sort dirs first, then alphabetical
+                    result.sort((a, b) => {
+                        if (a.is_dir && !b.is_dir) return -1;
+                        if (!a.is_dir && b.is_dir) return 1;
+                        return a.name.localeCompare(b.name);
+                    });
+
+                    resolve(result);
+                };
+                req.onerror = () => resolve([]);
+            });
+        }
+
+        read(filePath) {
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction('files', 'readonly');
+                const store = tx.objectStore('files');
+                const req = store.get(filePath);
+                req.onsuccess = () => resolve(req.result ? req.result.content : null);
+                req.onerror = () => reject(req.target.error);
+            });
+        }
+
+        write(filePath, content, isDir = false, size = null) {
+            return new Promise((resolve, reject) => {
+                const fileRecord = {
+                    path: filePath,
+                    content: content,
+                    is_dir: isDir,
+                    size: size !== null ? size : (content ? content.length : 0),
+                    updatedAt: Date.now()
+                };
+                const tx = this.db.transaction('files', 'readwrite');
+                const store = tx.objectStore('files');
+                const req = store.put(fileRecord);
+                req.onsuccess = () => resolve(true);
+                req.onerror = () => reject(req.target.error);
+            });
+        }
+
+        delete(filePath) {
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction('files', 'readwrite');
+                const store = tx.objectStore('files');
+                const req = store.delete(filePath);
+                req.onsuccess = () => resolve(true);
+                req.onerror = () => reject(req.target.error);
+            });
+        }
+
+        rename(oldPath, newPath) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const content = await this.read(oldPath);
+                    const fileRecord = {
+                        path: newPath,
+                        content: content,
+                        is_dir: false,
+                        size: content ? content.length : 0,
+                        updatedAt: Date.now()
+                    };
+                    await this.delete(oldPath);
+                    const tx = this.db.transaction('files', 'readwrite');
+                    const store = tx.objectStore('files');
+                    const req = store.put(fileRecord);
+                    req.onsuccess = () => resolve(true);
+                    req.onerror = () => reject(req.target.error);
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+    }
+
+    const VFS = new W11VirtualFS();
+
     // ===== NOTIFICATION TOAST HELPER =====
     function showSystemNotification(title, message) {
         const toast = document.createElement('div');
@@ -2096,29 +2260,15 @@
 
     function getNotepadContent() {
         return `
-            <div class="notepad-body">
-                <div class="notepad-menu">
-                    <div class="notepad-menu-item">File</div>
-                    <div class="notepad-menu-item">Edit</div>
-                    <div class="notepad-menu-item">View</div>
+            <div class="notepad-body" style="display:flex; flex-direction:column; height:100%; background:#1e1e1e;">
+                <div class="notepad-menu" style="display:flex; background:#252525; padding:4px 8px; border-bottom:1px solid #333; gap:12px;">
+                    <span class="notepad-menu-btn np-save" style="font-size:12px; color:#ccc; cursor:pointer; padding:2px 6px; border-radius:4px;">Save (VFS)</span>
+                    <span class="notepad-menu-btn np-download" style="font-size:12px; color:#ccc; cursor:pointer; padding:2px 6px; border-radius:4px;">Download</span>
+                    <input class="np-filename" value="note.txt" style="background:#333; border:1px solid #444; border-radius:4px; color:white; font-size:11px; padding:2px 6px; width:100px; outline:none; margin-left:auto;">
                 </div>
-                <textarea class="notepad-textarea" placeholder="Start typing..." spellcheck="false">Welcome to Windows 11 Notepad!
-
-This is a fully functional text editor.
-You can type, edit, and create your content here.
-
-Features:
-- Smooth window management
-- Drag and resize windows
-- Minimize, maximize, close
-- Right-click context menu
-- Working calculator
-- Multiple apps
-- And much more!
-
-Enjoy your Windows 11 experience! 🎉</textarea>
-                <div class="notepad-statusbar">
-                    <span>Ln 1, Col 1</span>
+                <textarea class="notepad-textarea" style="flex:1; background:#1e1e1e; border:none; color:white; font-family:Consolas, monospace; padding:12px; outline:none; resize:none; font-size:14px;"></textarea>
+                <div class="notepad-statusbar" style="background:#252525; padding:4px 12px; font-size:11px; color:#888; border-top:1px solid #333; display:flex; justify-content:space-between;">
+                    <span class="np-char-count">Lines: 1 | Chars: 0</span>
                     <span>UTF-8</span>
                 </div>
             </div>
@@ -2127,32 +2277,32 @@ Enjoy your Windows 11 experience! 🎉</textarea>
 
     function getCalculatorContent() {
         return `
-            <div class="calc-body" id="calc-body-${windowIdCounter}">
-                <div class="calc-display">
-                    <div class="calc-expression" id="calc-expr-${windowIdCounter}"></div>
-                    <div class="calc-result" id="calc-result-${windowIdCounter}">0</div>
+            <div class="calc-body" style="display: flex; flex-direction: column; height: 100%; background: #202020; color: white;">
+                <div class="calc-display" style="padding: 20px 16px 12px; text-align: right; flex-shrink: 0; background: #1a1a1a;">
+                    <div class="calc-expression" style="font-size: 14px; color: #888; min-height: 20px;"></div>
+                    <div class="calc-result" style="font-size: 42px; font-weight: 300;">0</div>
                 </div>
-                <div class="calc-buttons">
-                    <div class="calc-btn top-row" data-calc="%" data-wid="${windowIdCounter}">%</div>
-                    <div class="calc-btn top-row" data-calc="CE" data-wid="${windowIdCounter}">CE</div>
-                    <div class="calc-btn top-row" data-calc="C" data-wid="${windowIdCounter}">C</div>
-                    <div class="calc-btn top-row" data-calc="DEL" data-wid="${windowIdCounter}">⌫</div>
-                    <div class="calc-btn" data-calc="7" data-wid="${windowIdCounter}">7</div>
-                    <div class="calc-btn" data-calc="8" data-wid="${windowIdCounter}">8</div>
-                    <div class="calc-btn" data-calc="9" data-wid="${windowIdCounter}">9</div>
-                    <div class="calc-btn operator" data-calc="/" data-wid="${windowIdCounter}">÷</div>
-                    <div class="calc-btn" data-calc="4" data-wid="${windowIdCounter}">4</div>
-                    <div class="calc-btn" data-calc="5" data-wid="${windowIdCounter}">5</div>
-                    <div class="calc-btn" data-calc="6" data-wid="${windowIdCounter}">6</div>
-                    <div class="calc-btn operator" data-calc="*" data-wid="${windowIdCounter}">×</div>
-                    <div class="calc-btn" data-calc="1" data-wid="${windowIdCounter}">1</div>
-                    <div class="calc-btn" data-calc="2" data-wid="${windowIdCounter}">2</div>
-                    <div class="calc-btn" data-calc="3" data-wid="${windowIdCounter}">3</div>
-                    <div class="calc-btn operator" data-calc="-" data-wid="${windowIdCounter}">−</div>
-                    <div class="calc-btn" data-calc="±" data-wid="${windowIdCounter}">±</div>
-                    <div class="calc-btn" data-calc="0" data-wid="${windowIdCounter}">0</div>
-                    <div class="calc-btn" data-calc="." data-wid="${windowIdCounter}">.</div>
-                    <div class="calc-btn equals" data-calc="=" data-wid="${windowIdCounter}">=</div>
+                <div class="calc-buttons" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 4px; flex: 1;">
+                    <div class="calc-btn top-row" data-calc="%" style="background: rgba(255,255,255,0.03); font-size: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">%</div>
+                    <div class="calc-btn top-row" data-calc="CE" style="background: rgba(255,255,255,0.03); font-size: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">CE</div>
+                    <div class="calc-btn top-row" data-calc="C" style="background: rgba(255,255,255,0.03); font-size: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">C</div>
+                    <div class="calc-btn top-row" data-calc="DEL" style="background: rgba(255,255,255,0.03); font-size: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">⌫</div>
+                    <div class="calc-btn" data-calc="7" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">7</div>
+                    <div class="calc-btn" data-calc="8" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">8</div>
+                    <div class="calc-btn" data-calc="9" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">9</div>
+                    <div class="calc-btn operator" data-calc="/" style="background: rgba(255,255,255,0.04); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">÷</div>
+                    <div class="calc-btn" data-calc="4" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">4</div>
+                    <div class="calc-btn" data-calc="5" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">5</div>
+                    <div class="calc-btn" data-calc="6" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">6</div>
+                    <div class="calc-btn operator" data-calc="*" style="background: rgba(255,255,255,0.04); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">×</div>
+                    <div class="calc-btn" data-calc="1" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">1</div>
+                    <div class="calc-btn" data-calc="2" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">2</div>
+                    <div class="calc-btn" data-calc="3" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">3</div>
+                    <div class="calc-btn operator" data-calc="-" style="background: rgba(255,255,255,0.04); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">−</div>
+                    <div class="calc-btn" data-calc="±" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">±</div>
+                    <div class="calc-btn" data-calc="0" style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">0</div>
+                    <div class="calc-btn" data-calc="." style="background: rgba(255,255,255,0.06); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">.</div>
+                    <div class="calc-btn equals" data-calc="=" style="background: #0078d4; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px;">=</div>
                 </div>
             </div>
         `;
@@ -2160,13 +2310,15 @@ Enjoy your Windows 11 experience! 🎉</textarea>
 
     function getTerminalContent() {
         return `
-            <div class="terminal-body" id="terminal-${windowIdCounter}">
-                <div class="terminal-line">Windows PowerShell</div>
+            <div class="terminal-body" style="height: 100%; background: #0c0c0c; padding: 12px; font-family: 'Cascadia Code', Consolas, monospace; font-size: 13px; color: #cccccc; overflow-y: auto; display:flex; flex-direction:column; gap:4px;">
+                <div class="terminal-line">Windows PowerShell [Local System Host]</div>
                 <div class="terminal-line">Copyright (C) Microsoft Corporation. All rights reserved.</div>
-                <div class="terminal-line" style="margin-bottom:8px;">Install the latest PowerShell for new features and improvements!</div>
-                <div class="terminal-input-line">
-                    <span class="prompt">PS </span><span class="path">C:\\Users\\User> </span>
-                    <input class="terminal-input" data-wid="${windowIdCounter}" autofocus spellcheck="false">
+                <div class="terminal-line" style="color:#eacb64; margin-bottom:8px;">Warning: You have terminal access to run system commands natively through Python!</div>
+                <div class="terminal-output" style="display:flex; flex-direction:column; gap:2px;"></div>
+                <div class="terminal-input-line" style="display: flex; align-items: center;">
+                    <span class="prompt" style="color: #569cd6; font-weight:bold;">PS </span>
+                    <span class="path" style="color: #dcdcaa; margin-right:8px; font-weight:bold;">C:\\Users\\User&gt;</span>
+                    <input class="terminal-input" style="flex: 1; background: none; border: none; color: #cccccc; font-family: inherit; font-size: inherit; outline: none;" autofocus spellcheck="false">
                 </div>
             </div>
         `;
@@ -2174,14 +2326,508 @@ Enjoy your Windows 11 experience! 🎉</textarea>
 
     function getPhotosContent() {
         return `
-            <div class="photos-body">
-                <div class="photos-toolbar">
-                    <h3>Photos</h3>
-                    <span style="font-size:12px;color:var(--text-tertiary)">Collection</span>
+            <div class="photos-body" style="height: 100%; background: #111; display: flex; flex-direction: column; color:white;">
+                <div class="photos-toolbar" style="padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; background:#1f1f1f; border-bottom:1px solid #2d2d2d;">
+                    <h3 style="font-size:14px; font-weight:500;">Photos - Workspace Viewer</h3>
+                    <div style="display:flex; gap:12px;">
+                        <button class="photos-rotate-btn" style="background:#2d2d2d; border:none; color:white; padding:4px 12px; border-radius:4px; font-size:12px; cursor:pointer;">Rotate ↻</button>
+                        <button class="photos-prev-btn" style="background:#2d2d2d; border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer;">◀</button>
+                        <button class="photos-next-btn" style="background:#2d2d2d; border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer;">▶</button>
+                    </div>
                 </div>
-                <div class="photos-grid">
-                    ${PHOTO_URLS.map(url => `<div class="photos-item"><img src="${url}" alt="Photo" loading="lazy"></div>`).join('')}
-                    ${PHOTO_URLS.map(url => `<div class="photos-item"><img src="${url}" alt="Photo" loading="lazy"></div>`).join('')}
+                <div class="photos-display" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; position:relative; overflow:hidden;">
+                    <img class="photos-main-image" src="./images/1dark.jpg" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease; transform: rotate(0deg);">
+                </div>
+            </div>
+        `;
+    }
+
+    function getWordContent() {
+        return `
+            <div class="word-body" style="height:100%; background:#f3f2f1; display:flex; flex-direction:column; color:#333;">
+                <div class="word-ribbon" style="background:#005a9e; padding:6px 12px; display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                    <span style="font-size:13px; font-weight:600; color:white; margin-right:12px;">Word</span>
+                    <button class="word-format-btn" data-cmd="bold" style="background:#004578; border:none; color:white; padding:4px 10px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;">B</button>
+                    <button class="word-format-btn" data-cmd="italic" style="background:#004578; border:none; color:white; padding:4px 10px; border-radius:4px; font-size:12px; font-style:italic; cursor:pointer;">I</button>
+                    <button class="word-format-btn" data-cmd="underline" style="background:#004578; border:none; color:white; padding:4px 10px; border-radius:4px; font-size:12px; text-decoration:underline; cursor:pointer;">U</button>
+                    <select class="word-font-size" style="background:#004578; border:none; color:white; padding:4px; border-radius:4px; font-size:11px; cursor:pointer;">
+                        <option value="3">12px</option>
+                        <option value="4">14px</option>
+                        <option value="5">18px</option>
+                        <option value="6">24px</option>
+                    </select>
+                    <button class="word-format-btn" data-cmd="justifyLeft" style="background:#004578; border:none; color:white; padding:4px; border-radius:4px; cursor:pointer;">◀ Align</button>
+                    <button class="word-format-btn" data-cmd="justifyCenter" style="background:#004578; border:none; color:white; padding:4px; border-radius:4px; cursor:pointer;">■ Center</button>
+                    <button class="word-save-btn" style="background:#107c41; border:none; color:white; padding:4px 12px; border-radius:4px; font-size:12px; font-weight:500; cursor:pointer; margin-left:auto;">Save VFS</button>
+                    <input class="word-filename" value="document.docx" style="background:#004578; border:none; color:white; font-size:12px; padding:4px 8px; border-radius:4px; width:120px; outline:none;">
+                </div>
+                <div class="word-editor-container" style="flex:1; overflow-y:auto; padding:24px; display:flex; justify-content:center;">
+                    <div class="word-page" contenteditable="true" style="width:100%; max-width:800px; min-height:842px; background:white; box-shadow:0 4px 12px rgba(0,0,0,0.1); border-radius:4px; padding:60px 80px; outline:none; font-family:'Segoe UI', sans-serif; font-size:14px; line-height:1.6; color:#000;">
+                        <h2>Meeting Minutes</h2>
+                        <p>Welcome to <b>Microsoft Word Web Edition</b> on Windows 11. This is a real-time WYSIWYG editor built entirely with high-fidelity controllers.</p>
+                        <p>Write, format, align, and customize your documents, and save them directly to your system workspace using the Save button in the blue toolbar!</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getExcelContent() {
+        let colHeaders = '';
+        for (let i = 0; i < 10; i++) {
+            colHeaders += `<div style="flex:1; text-align:center; background:#f3f2f1; border-right:1px solid #d2d0ce; font-weight:600; font-size:11px; padding:2px 0;">${String.fromCharCode(65 + i)}</div>`;
+        }
+
+        let gridRows = '';
+        for (let r = 1; r <= 15; r++) {
+            let rowCells = `<div style="width:30px; text-align:center; background:#f3f2f1; border-bottom:1px solid #d2d0ce; border-right:1px solid #d2d0ce; font-weight:600; font-size:11px; padding:4px 0;">${r}</div>`;
+            for (let c = 0; c < 10; c++) {
+                let cellId = `${String.fromCharCode(65 + c)}${r}`;
+                rowCells += `<input class="excel-cell" id="cell-${cellId}" data-cell-id="${cellId}" style="flex:1; border:none; border-right:1px solid #d2d0ce; border-bottom:1px solid #d2d0ce; font-size:12px; padding:4px; outline:none; background:white; color:#333;" value="">`;
+            }
+            gridRows += `<div style="display:flex; height:26px;">${rowCells}</div>`;
+        }
+
+        return `
+            <div class="excel-body" style="height:100%; background:white; display:flex; flex-direction:column; color:#333; font-family:'Segoe UI', sans-serif;">
+                <div class="excel-ribbon" style="background:#107c41; padding:6px 12px; display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                    <span style="font-size:13px; font-weight:600; color:white; margin-right:12px;">Excel</span>
+                    <span style="color:white; font-size:12px;">Formula bar:</span>
+                    <input class="excel-formula-bar" placeholder="e.g. =SUM(A1,A2) or =A1+B1" style="flex:1; height:24px; border:none; padding:0 8px; font-size:11px; border-radius:4px; background:rgba(255,255,255,0.2); color:white; outline:none;">
+                    <button class="excel-save-btn" style="background:#005a9e; border:none; color:white; padding:4px 12px; border-radius:4px; font-size:11px; font-weight:500; cursor:pointer;">Save VFS</button>
+                    <input class="excel-filename" value="sheet.xlsx" style="background:rgba(0,0,0,0.2); border:none; color:white; font-size:12px; padding:4px 8px; border-radius:4px; width:100px; outline:none;">
+                </div>
+                <div class="excel-grid-container" style="flex:1; overflow:auto; display:flex; flex-direction:column;">
+                    <div style="display:flex; height:20px; flex-shrink:0;">
+                        <div style="width:30px; background:#f3f2f1; border-right:1px solid #d2d0ce; border-bottom:1px solid #d2d0ce;"></div>
+                        ${colHeaders}
+                    </div>
+                    <div class="excel-grid-rows" style="flex:1;">
+                        ${gridRows}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getPowerPointContent() {
+        return `
+            <div class="pp-body" style="height:100%; background:#2b2b2b; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="pp-ribbon" style="background:#c43e1c; padding:6px 12px; display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                    <span style="font-size:13px; font-weight:600; color:white; margin-right:12px;">PowerPoint</span>
+                    <button class="pp-add-slide-btn" style="background:rgba(255,255,255,0.15); border:none; color:white; padding:4px 12px; border-radius:4px; font-size:11px; cursor:pointer;">+ Add Slide</button>
+                    <button class="pp-present-btn" style="background:#107c41; border:none; color:white; padding:4px 12px; border-radius:4px; font-size:11px; cursor:pointer; font-weight:bold;">▶ Play slideshow</button>
+                    <span style="font-size:11px; color:#f3d7d0; margin-left:12px;">Background Theme:</span>
+                    <select class="pp-slide-bg" style="background:rgba(255,255,255,0.15); border:none; color:white; padding:4px; border-radius:4px; font-size:11px; cursor:pointer;">
+                        <option value="#c43e1c" style="background:#c43e1c; color:white;">Red-Orange theme</option>
+                        <option value="#107c41" style="background:#107c41; color:white;">Green theme</option>
+                        <option value="#005a9e" style="background:#005a9e; color:white;">Blue theme</option>
+                        <option value="#111111" style="background:#111111; color:white;">Minimalist Dark</option>
+                    </select>
+                </div>
+                <div class="pp-workspace" style="flex:1; display:flex; overflow:hidden;">
+                    <div class="pp-slides-list" style="width:140px; background:#1b1b1b; border-right:1px solid #333; padding:12px; display:flex; flex-direction:column; gap:8px; overflow-y:auto;">
+                        <div class="pp-slide-thumb active" data-slide-index="0" style="width:100%; aspect-ratio:1.6; background:#c43e1c; border:2px solid #0078d4; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px;">Slide 1</div>
+                    </div>
+                    <div class="pp-editor-area" style="flex:1; display:flex; align-items:center; justify-content:center; padding:32px; background:#202020; position:relative;">
+                        <div class="pp-slide-card" style="width:100%; max-width:640px; aspect-ratio:1.6; background:#c43e1c; border-radius:8px; box-shadow:0 8px 32px rgba(0,0,0,0.5); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; transition:all 0.3s;">
+                            <input class="pp-slide-title" value="My Presentation" style="background:transparent; border:none; text-align:center; color:white; font-size:28px; font-weight:bold; width:100%; outline:none; margin-bottom:12px; border-bottom:1px dashed rgba(255,255,255,0.3);">
+                            <input class="pp-slide-subtitle" value="Click to edit presentation subtitle" style="background:transparent; border:none; text-align:center; color:rgba(255,255,255,0.7); font-size:14px; width:100%; outline:none; border-bottom:1px dashed rgba(255,255,255,0.3);">
+                        </div>
+
+                        <!-- Fullscreen player -->
+                        <div class="pp-fullscreen-player" style="display:none; position:fixed; inset:0; background:black; z-index:10000; align-items:center; justify-content:center;">
+                            <div class="pp-fullscreen-slide" style="width:100%; max-width:1024px; aspect-ratio:1.6; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px;">
+                                <h1 class="pp-player-title" style="font-size:48px; font-weight:bold; color:white; margin-bottom:16px;">Title</h1>
+                                <p class="pp-player-subtitle" style="font-size:20px; color:rgba(255,255,255,0.8);">Subtitle</p>
+                            </div>
+                            <div style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:16px;">
+                                <button class="pp-player-prev" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:8px 16px; border-radius:6px; cursor:pointer;">◀ Previous</button>
+                                <button class="pp-player-exit" style="background:#c43e1c; border:none; color:white; padding:8px 16px; border-radius:6px; cursor:pointer;">Exit Slideshow</button>
+                                <button class="pp-player-next" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:8px 16px; border-radius:6px; cursor:pointer;">Next ▶</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getPaintContent() {
+        return `
+            <div class="paint-body" style="height:100%; background:#2d2d2d; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="paint-ribbon" style="background:#1a1a1a; padding:8px 12px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #3d3d3d; flex-shrink:0;">
+                    <span style="font-size:13px; font-weight:600; color:white;">Paint</span>
+                    <button class="paint-tool-btn active" data-tool="brush" style="background:#0078d4; border:none; color:white; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">🖌️ Brush</button>
+                    <button class="paint-tool-btn" data-tool="eraser" style="background:#3d3d3d; border:none; color:white; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">🧽 Eraser</button>
+                    <button class="paint-tool-btn" data-tool="line" style="background:#3d3d3d; border:none; color:white; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">╱ Line</button>
+                    <button class="paint-tool-btn" data-tool="rect" style="background:#3d3d3d; border:none; color:white; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">⬜ Rect</button>
+                    <button class="paint-tool-btn" data-tool="circle" style="background:#3d3d3d; border:none; color:white; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">⚪ Circle</button>
+
+                    <span style="font-size:11px; color:#aaa; margin-left:8px;">Size:</span>
+                    <input class="paint-size-slider" type="range" min="1" max="20" value="4" style="width:70px;">
+
+                    <span style="font-size:11px; color:#aaa; margin-left:8px;">Color:</span>
+                    <input class="paint-color-picker" type="color" value="#0078d4" style="border:none; background:transparent; width:28px; height:28px; cursor:pointer;">
+
+                    <button class="paint-clear-btn" style="background:#c42b1c; border:none; color:white; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer; margin-left:auto;">Clear</button>
+                    <button class="paint-save-btn" style="background:#107c41; border:none; color:white; padding:4px 12px; border-radius:4px; font-size:11px; font-weight:500; cursor:pointer;">Save VFS</button>
+                </div>
+                <div class="paint-canvas-container" style="flex:1; display:flex; align-items:center; justify-content:center; padding:16px; overflow:auto; background:#202020;">
+                    <canvas class="paint-canvas" width="600" height="400" style="background:white; border-radius:4px; box-shadow:0 4px 16px rgba(0,0,0,0.5); cursor:crosshair;"></canvas>
+                </div>
+            </div>
+        `;
+    }
+
+    function getCameraContent() {
+        return `
+            <div class="camera-body" style="height:100%; background:black; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="camera-viewfinder-container" style="flex:1; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+                    <video class="camera-stream" autoplay playsinline style="width:100%; height:100%; object-fit:cover; transform: scaleX(-1);"></video>
+                    <div class="camera-flash" style="position:absolute; inset:0; background:white; opacity:0; pointer-events:none; transition:opacity 0.15s;"></div>
+                    <div class="camera-no-feed" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; background:#111;">
+                        <span style="font-size:48px;">📷</span>
+                        <div style="font-size:14px; color:#888;">Live feed standby. Click Snap below to capture!</div>
+                    </div>
+                </div>
+                <div class="camera-controls" style="height:64px; background:#1a1a1a; border-top:1px solid #2d2d2d; display:flex; align-items:center; justify-content:center; gap:20px;">
+                    <button class="camera-snap-btn" style="width:44px; height:44px; border-radius:50%; background:white; border:4px solid #444; cursor:pointer; transition:transform 0.1s; display:flex; align-items:center; justify-content:center; outline:none;"></button>
+                    <span style="font-size:12px; color:#aaa;">Click white button to save snap!</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function getMusicContent() {
+        return `
+            <div class="music-body" style="height:100%; background:#1c1c1c; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="music-header" style="background:#252525; padding:12px 20px; display:flex; align-items:center; border-bottom:1px solid #2d2d2d; flex-shrink:0;">
+                    <span style="font-size:18px; font-weight:600; color:#eacb64; display:flex; align-items:center; gap:8px;">🎵 Groove Music</span>
+                </div>
+                <div class="music-main" style="flex:1; display:flex; overflow:hidden;">
+                    <div class="music-playlist" style="width:200px; background:#202020; border-right:1px solid #2d2d2d; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
+                        <div style="font-size:10px; color:#666; font-weight:600; text-transform:uppercase; margin-bottom:6px;">Tracklist</div>
+                        <div class="music-track-item active" data-track-id="0" style="padding:8px; border-radius:4px; font-size:12px; cursor:pointer; background:#2d2d2d;">Windows Startup Remix</div>
+                        <div class="music-track-item" data-track-id="1" style="padding:8px; border-radius:4px; font-size:12px; cursor:pointer;">Synthwave Odyssey</div>
+                        <div class="music-track-item" data-track-id="2" style="padding:8px; border-radius:4px; font-size:12px; cursor:pointer;">Acoustic Lofi Chill</div>
+                    </div>
+                    <div class="music-visualizer-container" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; background:#111; position:relative;">
+                        <canvas class="music-canvas-visualizer" width="300" height="150" style="width:100%; max-width:400px; height:120px; background:#111; margin-bottom:12px; border-radius:8px;"></canvas>
+                        <div class="music-current-title" style="font-size:14px; font-weight:600; text-align:center; margin-bottom:4px;">Windows Startup Remix</div>
+                        <div class="music-current-artist" style="font-size:12px; color:#888; text-align:center;">Groove Official</div>
+                    </div>
+                </div>
+                <div class="music-player-bar" style="background:#252525; padding:12px 24px; border-top:1px solid #2d2d2d; display:flex; flex-direction:column; gap:8px; flex-shrink:0;">
+                    <div style="display:flex; justify-content:between; font-size:11px; color:#888;">
+                        <span class="music-time-current">0:00</span>
+                        <input class="music-progress" type="range" min="0" max="100" value="20" style="flex:1; margin:0 12px; height:4px; border-radius:2px; cursor:pointer;">
+                        <span class="music-time-total">3:42</span>
+                    </div>
+                    <div style="display:flex; align-items:center; justify-content:center; gap:16px;">
+                        <button class="music-ctrl-btn btn-prev" style="background:transparent; border:none; color:white; font-size:16px; cursor:pointer;">⏮</button>
+                        <button class="music-ctrl-btn btn-play" style="background:#eacb64; border:none; color:black; width:36px; height:36px; border-radius:50%; font-size:16px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;">▶</button>
+                        <button class="music-ctrl-btn btn-next" style="background:transparent; border:none; color:white; font-size:16px; cursor:pointer;">⏭</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getTeamsContent() {
+        return `
+            <div class="teams-body" style="height:100%; background:#202020; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="teams-header" style="background:#2b2b2b; padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #2d2d2d; flex-shrink:0;">
+                    <div style="width:32px; height:32px; border-radius:50%; background:#6264a7; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:13px;">AI</div>
+                    <div>
+                        <div style="font-size:13px; font-weight:600;">Microsoft Copilot</div>
+                        <div style="font-size:11px; color:#32cd32;">Active Online</div>
+                    </div>
+                </div>
+                <div class="teams-messages" style="flex:1; padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; background:#181818;">
+                    <div style="display:flex; gap:8px;">
+                        <div style="width:28px; height:28px; border-radius:50%; background:#6264a7; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">AI</div>
+                        <div style="background:#2d2d2d; padding:8px 12px; border-radius:0 8px 8px 8px; font-size:13px; max-width:80%;">
+                            Hello! I am Microsoft Copilot integrated inside Teams. How can I assist you with Windows 11 Web Edition today? Feel free to ask any question or chat!
+                        </div>
+                    </div>
+                </div>
+                <div class="teams-footer" style="padding:12px; background:#2b2b2b; border-top:1px solid #2d2d2d; display:flex; gap:8px; flex-shrink:0;">
+                    <input class="teams-input" placeholder="Type a message to Copilot..." style="flex:1; height:36px; background:#181818; border:1px solid #444; border-radius:18px; color:white; padding:0 16px; font-size:13px; outline:none;">
+                    <button class="teams-send-btn" style="background:#6264a7; border:none; color:white; padding:0 16px; border-radius:18px; font-size:13px; font-weight:500; cursor:pointer;">Send</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function getStoreContent() {
+        return `
+            <div class="store-body" style="height:100%; background:#0f0f1c; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="store-header" style="background:rgba(0,0,0,0.4); padding:16px 24px; display:flex; align-items:center; gap:20px; border-bottom:1px solid rgba(255,255,255,0.08); flex-shrink:0;">
+                    <span style="font-size:20px; font-weight:600; background:linear-gradient(45deg, #00bcf2, #0078d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Microsoft Store</span>
+                    <span style="font-size:12px; color:#888;">Publish & Install Custom Apps!</span>
+                </div>
+                <div class="store-main" style="flex:1; padding:24px; overflow-y:auto; display:flex; gap:24px;">
+                    <!-- Left card: Custom app register form -->
+                    <div class="store-custom-form-card" style="width:280px; background:#1c1c2e; border:1px solid rgba(255,255,255,0.08); padding:20px; border-radius:12px; display:flex; flex-direction:column; gap:12px; flex-shrink:0;">
+                        <h3 style="font-size:14px; font-weight:600; color:#b078ff; margin-bottom:4px;">Publish Custom Web App</h3>
+                        <div>
+                            <label style="font-size:11px; color:#888; display:block; margin-bottom:4px;">App Name:</label>
+                            <input class="store-custom-name" placeholder="e.g. My Website" style="width:100%; height:32px; background:#111; border:1px solid #444; border-radius:4px; color:white; padding:0 10px; font-size:12px; outline:none;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:#888; display:block; margin-bottom:4px;">App URL (local/https):</label>
+                            <input class="store-custom-url" placeholder="e.g. http://localhost:3000" style="width:100%; height:32px; background:#111; border:1px solid #444; border-radius:4px; color:white; padding:0 10px; font-size:12px; outline:none;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:#888; display:block; margin-bottom:4px;">App Logo URL (or icon):</label>
+                            <input class="store-custom-logo" placeholder="e.g. https://.../logo.png" style="width:100%; height:32px; background:#111; border:1px solid #444; border-radius:4px; color:white; padding:0 10px; font-size:12px; outline:none;">
+                        </div>
+                        <button class="store-custom-btn" style="background:#5c2d91; border:none; color:white; height:36px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer; margin-top:8px;">Install Custom App</button>
+                    </div>
+
+                    <!-- Right container: Featured catalog -->
+                    <div style="flex:1;">
+                        <div style="font-size:16px; font-weight:600; margin-bottom:16px;">Featured App Catalog</div>
+                        <div class="store-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;">
+                            <div class="store-item" style="background:#1c1c2e; border:1px solid rgba(255,255,255,0.06); padding:16px; border-radius:8px; display:flex; flex-direction:column; gap:12px;">
+                                <div style="display:flex; gap:12px; align-items:center;">
+                                    <div style="font-size:36px;">🤖</div>
+                                    <div>
+                                        <div style="font-weight:600; font-size:13px;">VS Code</div>
+                                        <div style="font-size:11px; color:#888;">Code editor</div>
+                                    </div>
+                                </div>
+                                <div style="font-size:11px; color:#ccc;">Excellent lightweight source code IDE ready to launch.</div>
+                                <button class="store-install-btn" data-app-id="vscode" style="background:#0078d4; border:none; color:white; padding:6px 0; border-radius:4px; font-size:11px; font-weight:600; cursor:pointer;">Get App</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getCalendarContent() {
+        return `
+            <div class="calendar-body" style="height:100%; background:#1c1c1c; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="calendar-header" style="background:#252525; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #2d2d2d; flex-shrink:0;">
+                    <span style="font-size:16px; font-weight:600;">Calendar - Scheduler</span>
+                    <span style="font-size:13px; color:#0078d4; font-weight:500;">Add Note to days!</span>
+                </div>
+                <div class="calendar-grid-container" style="flex:1; padding:16px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:grid; grid-template-columns:repeat(7, 1fr); text-align:center; font-size:11px; color:#888; font-weight:600;">
+                        <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+                    </div>
+                    <div class="calendar-days-grid" style="flex:1; display:grid; grid-template-columns:repeat(7, 1fr); grid-auto-rows:1fr; gap:4px;">
+                        <!-- Filled in dynamically -->
+                    </div>
+                    <div class="calendar-scheduler-note" style="background:#252525; border:1px solid #333; border-radius:6px; padding:10px; font-size:12px;">
+                        <div style="font-weight:600; margin-bottom:4px; color:#eacb64;">Day Event Note:</div>
+                        <input class="cal-note-input" placeholder="Type event note and click save..." style="width:100%; height:28px; background:#181818; border:1px solid #444; border-radius:4px; color:white; padding:0 8px; font-size:12px; outline:none; margin-bottom:6px;">
+                        <button class="cal-note-save-btn" style="background:#0078d4; border:none; color:white; padding:4px 12px; border-radius:4px; cursor:pointer;">Save event</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getMailContent() {
+        return `
+            <div class="mail-body" style="height:100%; background:#202020; display:flex; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="mail-sidebar" style="width:160px; background:#252525; border-right:1px solid #333; padding:12px; display:flex; flex-direction:column; gap:12px;">
+                    <button class="mail-compose-btn" style="background:#0078d4; border:none; color:white; padding:8px 0; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer;">+ New Mail</button>
+                    <div class="mail-sidebar-folders" style="display:flex; flex-direction:column; gap:8px; font-size:13px; margin-top:8px;">
+                        <div class="mail-folder active" style="font-weight:600; color:#0078d4; cursor:pointer;">📥 Inbox (2)</div>
+                        <div class="mail-folder" style="cursor:pointer; color:#888;">📤 Sent</div>
+                        <div class="mail-folder" style="cursor:pointer; color:#888;">🗑️ Trash</div>
+                    </div>
+                </div>
+                <div class="mail-list" style="width:200px; background:#181818; border-right:1px solid #333; overflow-y:auto; display:flex; flex-direction:column;">
+                    <div class="mail-item active" data-mail-index="0" style="padding:12px; border-bottom:1px solid #2d2d2d; cursor:pointer; background:#252525;">
+                        <div style="font-size:12px; font-weight:600;">Microsoft Windows</div>
+                        <div style="font-size:11px; font-weight:500; margin-top:2px;">Welcome to your Inbox!</div>
+                        <div style="font-size:10px; color:#888; margin-top:4px;">Hi! We are happy to...</div>
+                    </div>
+                    <div class="mail-item" data-mail-index="1" style="padding:12px; border-bottom:1px solid #2d2d2d; cursor:pointer;">
+                        <div style="font-size:12px; font-weight:600;">Azure Security Team</div>
+                        <div style="font-size:11px; font-weight:500; margin-top:2px;">Security verification notice</div>
+                        <div style="font-size:10px; color:#888; margin-top:4px;">Important verification for...</div>
+                    </div>
+                </div>
+                <div class="mail-preview" style="flex:1; padding:20px; background:#202020; overflow-y:auto; display:flex; flex-direction:column; gap:12px;">
+                    <!-- Inbox/Compose view -->
+                    <div class="mail-view-panel">
+                        <h2 class="mail-subject" style="font-size:16px; font-weight:600; border-bottom:1px solid #333; padding-bottom:8px; margin-bottom:12px;">Welcome to your Inbox!</h2>
+                        <div style="font-size:12px; color:#888; margin-bottom:12px;">From: <b>Microsoft Windows</b> (windows@microsoft.com)</div>
+                        <div class="mail-body-content" style="font-size:13px; line-height:1.6; color:#ccc;">
+                            Hi user,<br><br>
+                            We are delighted to welcome you to Windows 11 Web Edition with Python local backend enabled.<br>
+                            Check your interactive office applications, command terminals, drawings, webcam captures, and visualizers. Everything is 100% polished to god-level standards.<br><br>
+                            Enjoy your stay!
+                        </div>
+                    </div>
+                    <div class="mail-compose-panel" style="display:none; flex-direction:column; gap:8px;">
+                        <input class="mail-to" placeholder="To:" style="background:#181818; border:1px solid #444; border-radius:4px; height:32px; color:white; padding:0 12px; font-size:12px; outline:none;">
+                        <input class="mail-subj" placeholder="Subject:" style="background:#181818; border:1px solid #444; border-radius:4px; height:32px; color:white; padding:0 12px; font-size:12px; outline:none;">
+                        <textarea class="mail-text" placeholder="Write email text here..." style="background:#181818; border:1px solid #444; border-radius:4px; height:180px; color:white; padding:12px; font-size:12px; outline:none; resize:none;"></textarea>
+                        <button class="mail-send-btn" style="background:#0078d4; border:none; color:white; height:32px; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer;">Send Mail</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getMapsContent() {
+        return `
+            <div class="maps-body" style="height:100%; background:#1c1c1c; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="maps-toolbar" style="background:#252525; padding:8px 16px; display:flex; align-items:center; gap:8px; border-bottom:1px solid #2d2d2d; flex-shrink:0;">
+                    <span style="font-size:13px; font-weight:600; color:#32cd32;">Maps</span>
+                    <input class="maps-address" value="New York City" style="flex:1; height:28px; background:#181818; border:1px solid #444; border-radius:4px; color:white; padding:0 12px; font-size:12px; outline:none;">
+                    <button class="maps-search-btn" style="background:#0078d4; border:none; color:white; padding:4px 16px; border-radius:4px; font-size:12px; cursor:pointer;">Search</button>
+                </div>
+                <div class="maps-view" style="flex:1; position:relative; background:#111; overflow:hidden;">
+                    <!-- Beautiful vector mockup background representing a GPS grid map -->
+                    <div style="position:absolute; inset:0; background:radial-gradient(circle, #333 1px, transparent 1px) 0 0/20px 20px, linear-gradient(#2d2d2d 1px, transparent 1px) 0 0/40px 40px; opacity:0.8;"></div>
+                    <div class="maps-location-marker" style="position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); display:flex; flex-direction:column; align-items:center; gap:4px; z-index:10;">
+                        <svg viewBox="0 0 24 24" style="width:36px; height:36px; fill:#ff4500; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+                        <div class="maps-label" style="background:rgba(0,0,0,0.8); border:1px solid #ff4500; border-radius:4px; padding:2px 8px; font-size:11px; white-space:nowrap; font-weight:600;">New York City</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getSnippingContent() {
+        return `
+            <div class="snipping-body" style="height:100%; background:#202020; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="snipping-toolbar" style="background:#2b2b2b; padding:8px 12px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #3d3d3d; flex-shrink:0;">
+                    <button class="snip-new-btn" style="background:#0078d4; border:none; color:white; padding:6px 14px; border-radius:4px; font-weight:600; font-size:12px; cursor:pointer;">✂️ New Snip</button>
+                    <span style="font-size:11px; color:#aaa;">Mode:</span>
+                    <select class="snip-mode" style="background:#3d3d3d; border:none; color:white; padding:4px; border-radius:4px; font-size:11px; cursor:pointer;">
+                        <option value="rect">Rectangular snip</option>
+                        <option value="free">Freeform snip</option>
+                        <option value="full">Fullscreen snip</option>
+                    </select>
+                    <button class="snip-pen-btn active" data-color="#ff4500" style="background:#ff4500; border:none; width:18px; height:18px; border-radius:50%; cursor:pointer;"></button>
+                    <button class="snip-pen-btn" data-color="#32cd32" style="background:#32cd32; border:none; width:18px; height:18px; border-radius:50%; cursor:pointer;"></button>
+                    <button class="snip-pen-btn" data-color="#ffd700" style="background:#ffd700; border:none; width:18px; height:18px; border-radius:50%; cursor:pointer;"></button>
+                    <button class="snip-save-btn" style="background:#107c41; border:none; color:white; padding:6px 12px; border-radius:4px; font-size:11px; cursor:pointer; margin-left:auto;">Save snip</button>
+                </div>
+                <div class="snipping-view" style="flex:1; background:#111; display:flex; align-items:center; justify-content:center; padding:16px; position:relative; overflow:hidden;">
+                    <!-- Snipping capture preview board -->
+                    <canvas class="snipping-canvas" width="600" height="360" style="background:#2d2d2d; border-radius:4px; box-shadow:0 4px 16px rgba(0,0,0,0.5); cursor:crosshair;"></canvas>
+                    <div class="snipping-overlay-msg" style="position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+                        <span style="font-size:36px;">✂️</span>
+                        <div style="font-size:13px; color:#ccc;">Click New Snip to drag and capture screen area!</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getClipchampContent() {
+        return `
+            <div class="clipchamp-body" style="height:100%; background:#13131c; display:flex; flex-direction:column; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="clipchamp-header" style="background:#1e1e2d; padding:12px 20px; display:flex; align-items:center; border-bottom:1px solid #2d2d3d; flex-shrink:0;">
+                    <span style="font-size:16px; font-weight:600; color:#b078ff; display:flex; align-items:center; gap:8px;">🎞️ Microsoft Clipchamp</span>
+                    <button class="clipchamp-export-btn" style="background:#b078ff; border:none; color:white; padding:6px 16px; border-radius:4px; font-weight:600; font-size:11px; cursor:pointer; margin-left:auto;">Export video</button>
+                </div>
+                <div class="clipchamp-editor" style="flex:1; display:flex; overflow:hidden;">
+                    <div class="clipchamp-assets" style="width:160px; background:#181824; border-right:1px solid #2d2d3d; padding:12px; display:flex; flex-direction:column; gap:8px;">
+                        <span style="font-size:10px; color:#888; font-weight:600; text-transform:uppercase;">Media Assets</span>
+                        <div class="clip-asset-item" style="background:#242436; border:1px dashed #444; border-radius:4px; padding:10px; font-size:11px; text-align:center; cursor:pointer;">+ Add media</div>
+                        <div class="clip-asset-list" style="display:flex; flex-direction:column; gap:4px;">
+                            <!-- asset templates -->
+                        </div>
+                    </div>
+                    <div class="clipchamp-workspace" style="flex:1; display:flex; flex-direction:column;">
+                        <div class="clipchamp-preview" style="flex:1; background:#0c0c14; display:flex; align-items:center; justify-content:center; position:relative;">
+                            <!-- Mock video player canvas -->
+                            <div class="clip-player-frame" style="width:80%; aspect-ratio:1.77; background:#13131c; border-radius:6px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; border:1px solid #3d3d5c;">
+                                <div class="clip-text-overlay" style="position:absolute; color:white; font-size:18px; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.8);">My Epic Video</div>
+                                <span class="clip-play-indicator" style="font-size:36px; opacity:0.8; cursor:pointer;">▶</span>
+                            </div>
+                        </div>
+                        <div class="clipchamp-timeline" style="height:140px; background:#181824; border-top:1px solid #2d2d2d; padding:12px; display:flex; flex-direction:column; gap:6px; overflow-y:auto;">
+                            <div style="display:flex; justify-content:between; font-size:10px; color:#888; margin-bottom:4px;">
+                                <span>Timeline tracks</span>
+                                <button class="clip-split-btn" style="background:#242436; border:none; color:white; font-size:9px; padding:2px 6px; border-radius:2px; cursor:pointer;">✂ Split Clip</button>
+                            </div>
+                            <div class="clip-track" style="height:26px; background:rgba(176,120,255,0.15); border:1px solid #b078ff; border-radius:4px; display:flex; align-items:center; padding:0 12px; font-size:11px;">📽️ Video track [Clip1.mp4]</div>
+                            <div class="clip-track" style="height:26px; background:rgba(50,205,50,0.15); border:1px solid #32cd32; border-radius:4px; display:flex; align-items:center; padding:0 12px; font-size:11px;">🎵 Audio track [Music.mp3]</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getOneNoteContent() {
+        return `
+            <div class="onenote-body" style="height:100%; background:#2d2d2d; display:flex; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="onenote-notebooks" style="width:160px; background:#1f1f1f; border-right:1px solid #3d3d3d; padding:12px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size:11px; color:#b078ff; font-weight:600; text-transform:uppercase;">Notebooks</div>
+                    <button class="onenote-add-nb-btn" style="background:#5c2d91; border:none; color:white; padding:4px 0; border-radius:4px; font-size:11px; cursor:pointer; font-weight:600;">+ Notebook</button>
+                    <div class="onenote-nb-list" style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                        <!-- notebooks -->
+                    </div>
+                </div>
+                <div class="onenote-sections" style="width:140px; background:#252525; border-right:1px solid #3d3d3d; padding:12px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size:10px; color:#888; font-weight:600; text-transform:uppercase;">Sections</div>
+                    <button class="onenote-add-sec-btn" style="background:#3d3d3d; border:none; color:white; padding:4px 0; border-radius:4px; font-size:11px; cursor:pointer;">+ Section</button>
+                    <div class="onenote-sec-list" style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                        <!-- sections -->
+                    </div>
+                </div>
+                <div class="onenote-pages-editor" style="flex:1; display:flex; flex-direction:column; background:#2d2d2d;">
+                    <div class="onenote-editor-header" style="padding:12px 20px; background:#222; border-bottom:1px solid #3d3d3d; display:flex; align-items:center; gap:12px;">
+                        <input class="onenote-page-title" value="My Quick Notes" style="background:transparent; border:none; font-size:18px; font-weight:600; color:white; outline:none; flex:1;">
+                        <button class="onenote-save-btn" style="background:#5c2d91; border:none; color:white; padding:6px 16px; border-radius:4px; font-size:11px; cursor:pointer; font-weight:600;">Save notes</button>
+                    </div>
+                    <div class="onenote-textarea-container" style="flex:1; padding:20px; overflow-y:auto;">
+                        <textarea class="onenote-textarea" style="width:100%; height:100%; background:transparent; border:none; color:white; font-size:14px; outline:none; resize:none; font-family:inherit; line-height:1.6;" placeholder="Start writing something..."></textarea>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getMediaPlayerContent() {
+        return `
+            <div class="mediaplayer-body" style="height:100%; background:#111; display:flex; color:white; font-family:'Segoe UI', sans-serif;">
+                <div class="mediaplayer-sidebar" style="width:160px; background:#1c1c1c; border-right:1px solid #2d2d2d; padding:12px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="font-size:11px; color:#ff4500; font-weight:600; text-transform:uppercase;">Library</div>
+                    <div class="player-nav-item active" style="font-size:13px; cursor:pointer; color:#ff4500;">📻 Now Playing</div>
+                    <div class="player-nav-item" style="font-size:13px; cursor:pointer; color:#888;">🎵 Music Library</div>
+                    <div class="player-nav-item" style="font-size:13px; cursor:pointer; color:#888;">📽️ Video Library</div>
+                </div>
+                <div class="mediaplayer-main" style="flex:1; display:flex; flex-direction:column; background:#080808;">
+                    <div class="mediaplayer-view" style="flex:1; display:flex; align-items:center; justify-content:center; padding:24px; position:relative; overflow:hidden;">
+                        <!-- Animated player board -->
+                        <div class="player-display" style="width:100%; max-width:440px; aspect-ratio:1.6; background:#1c1c1c; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; border:1px solid #2d2d2d; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+                            <div class="player-disc" style="width:120px; height:120px; border-radius:50%; background:radial-gradient(circle, #333 30%, #111 31%, #ff4500 32%, #111 33%); box-shadow:0 4px 16px rgba(0,0,0,0.5); margin-bottom:16px; transition:transform 0.1s linear; transform:rotate(0deg);"></div>
+                            <h3 class="player-track-title" style="font-size:14px; font-weight:600;">Default Sample Track</h3>
+                            <p class="player-track-artist" style="font-size:11px; color:#888; margin-top:2px;">Windows Media Service</p>
+                        </div>
+                    </div>
+                    <div class="mediaplayer-controls" style="background:#161616; padding:12px 24px; border-top:1px solid #2d2d2d; display:flex; flex-direction:column; gap:8px;">
+                        <div style="display:flex; justify-content:between; align-items:center; font-size:11px; color:#888; gap:12px;">
+                            <span class="player-current-time">0:00</span>
+                            <input class="player-progress-bar" type="range" min="0" max="100" value="0" style="flex:1; height:4px; border-radius:2px; cursor:pointer;">
+                            <span class="player-total-time">3:00</span>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:center; gap:20px; position:relative;">
+                            <div class="player-disc" style="width:120px; height:120px; border-radius:50%; background:radial-gradient(circle, #333 30%, #111 31%, #ff4500 32%, #111 33%); box-shadow:0 4px 16px rgba(0,0,0,0.5); margin-bottom:16px; transition:transform 0.1s linear; transform:rotate(0deg);"></div>
+                            <button class="player-ctrl-btn btn-player-prev" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;">⏮</button>
+                            <button class="player-ctrl-btn btn-player-play" style="background:#ff4500; border:none; color:white; width:38px; height:38px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">▶</button>
+                            <button class="player-ctrl-btn btn-player-next" style="background:transparent; border:none; color:white; font-size:18px; cursor:pointer;">⏭</button>
+                            <div style="position:absolute; right:0; display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:14px;">🔊</span>
+                                <input class="player-volume-bar" type="range" min="0" max="100" value="70" style="width:60px;">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -2418,55 +3064,78 @@ Enjoy your Windows 11 experience! 🎉</textarea>
         const el = document.getElementById(`window-${winId}`);
         if (!el) return;
         const termBody = el.querySelector('.terminal-body');
+        const termOutput = el.querySelector('.terminal-output');
         const input = el.querySelector('.terminal-input');
         if (!input) return;
 
-        input.addEventListener('keydown', (e) => {
+        input.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter') {
                 const cmd = input.value.trim();
-                const inputLine = input.closest('.terminal-input-line');
 
-                const outputLine = document.createElement('div');
-                outputLine.className = 'terminal-line';
-                outputLine.innerHTML = `<span class="prompt">PS </span><span class="path">C:\\Users\\User> </span>${cmd}`;
-                termBody.insertBefore(outputLine, inputLine);
+                // Add command entry to terminal history output
+                const cmdLine = document.createElement('div');
+                cmdLine.style.display = 'flex';
+                cmdLine.style.gap = '8px';
+                cmdLine.innerHTML = `
+                    <span style="color: #569cd6; font-weight:bold;">PS</span>
+                    <span style="color: #dcdcaa; font-weight:bold;">C:\\Users\\User&gt;</span>
+                    <span style="color: white;">${cmd}</span>
+                `;
+                termOutput.appendChild(cmdLine);
 
                 if (cmd) {
-                    const response = document.createElement('div');
-                    response.className = 'terminal-line';
+                    const response = document.createElement('pre');
+                    response.style.margin = '4px 0 12px 0';
+                    response.style.fontFamily = 'inherit';
+                    response.style.fontSize = 'inherit';
+                    response.style.color = '#cccccc';
+                    response.style.whiteSpace = 'pre-wrap';
+                    response.style.wordBreak = 'break-all';
+
                     const lower = cmd.toLowerCase();
 
                     if (lower === 'help') {
-                        response.innerHTML = 'Available commands: help, echo, date, time, clear, whoami, dir, hostname, ver';
-                    } else if (lower.startsWith('echo ')) {
-                        response.textContent = cmd.slice(5);
+                        response.innerHTML = `Local PowerShell commands:
+  help           Display this local workspace help
+  clear / cls    Clear screen
+  date           Get today's local system date
+  time           Get local system time
+  whoami         Retrieve current logged user details
+  ver            Retrieve Windows Mock Build specifications
+
+Real-System Commands (Delegated to python backend server.py!):
+  All others (e.g. ls, pwd, cat, uname -a, python3 --version, df -h, etc.)`;
+                    } else if (lower === 'clear' || lower === 'cls') {
+                        termOutput.innerHTML = '';
+                        input.value = '';
+                        return;
                     } else if (lower === 'date') {
                         response.textContent = new Date().toLocaleDateString();
                     } else if (lower === 'time') {
                         response.textContent = new Date().toLocaleTimeString();
-                    } else if (lower === 'clear' || lower === 'cls') {
-                        while (termBody.firstChild !== inputLine) termBody.removeChild(termBody.firstChild);
-                        input.value = '';
-                        return;
                     } else if (lower === 'whoami') {
                         response.textContent = 'DESKTOP-WIN11\\User';
-                    } else if (lower === 'dir') {
-                        response.innerHTML = ' Directory of C:\\Users\\User\n\n' +
-                            '01/01/2024  10:00 AM    <DIR>          Desktop\n' +
-                            '01/01/2024  10:00 AM    <DIR>          Documents\n' +
-                            '01/01/2024  10:00 AM    <DIR>          Downloads\n' +
-                            '01/01/2024  10:00 AM    <DIR>          Music\n' +
-                            '01/01/2024  10:00 AM    <DIR>          Pictures\n' +
-                            '01/01/2024  10:00 AM    <DIR>          Videos';
-                        response.style.whiteSpace = 'pre';
-                    } else if (lower === 'hostname') {
-                        response.textContent = 'DESKTOP-WIN11';
                     } else if (lower === 'ver') {
-                        response.textContent = 'Microsoft Windows [Version 11.0.22631]';
+                        response.textContent = 'Microsoft Windows [Version 11.0.22631.3000 Web-Engine]';
                     } else {
-                        response.innerHTML = `<span style="color:#f44">'${cmd}' is not recognized as a command. Type 'help' for available commands.</span>`;
+                        // Forward command to our genuine python api cmd runner
+                        try {
+                            const res = await fetch('/api/cmd', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ command: cmd })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                response.textContent = data.output || '(No output returned)';
+                            } else {
+                                response.innerHTML = `<span style="color:#f44">Error executing command on backend: ${data.error}</span>`;
+                            }
+                        } catch (err) {
+                            response.innerHTML = `<span style="color:#f44">Local Python backend server offline or CORS restricted. Executing locally: '${cmd}' not found.</span>`;
+                        }
                     }
-                    termBody.insertBefore(response, inputLine);
+                    termOutput.appendChild(response);
                 }
 
                 input.value = '';
@@ -3569,6 +4238,7 @@ Enjoy your Windows 11 experience! 🎉</textarea>
         const el = document.getElementById(`window-${winId}`);
         if (!el) return;
 
+        // Featured app installs
         el.querySelectorAll('.store-install-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const appId = btn.dataset.appId;
@@ -3582,7 +4252,7 @@ Enjoy your Windows 11 experience! 🎉</textarea>
 
                     let appName = "VS Code";
                     let appIcon = "🤖";
-                    if (appId === 'whiteboard') { appName = "Whiteboard"; appIcon = "📝"; }
+                    let customUrl = "https://github1s.com";
 
                     const shortcut = document.createElement('div');
                     shortcut.className = 'desktop-icon';
@@ -3590,6 +4260,18 @@ Enjoy your Windows 11 experience! 🎉</textarea>
 
                     shortcut.addEventListener('dblclick', () => {
                         showSystemNotification(appName, `Launching ${appName}...`);
+                        // Launch in Edge!
+                        const edgeApp = APPS.find(a => a.id === 'edge');
+                        if (edgeApp) {
+                            openApp(edgeApp);
+                            setTimeout(() => {
+                                const edgeInp = document.querySelector('.edge-url-input');
+                                if (edgeInp) {
+                                    edgeInp.value = customUrl;
+                                    edgeInp.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+                                }
+                            }, 500);
+                        }
                     });
 
                     document.getElementById('desktop-icons').appendChild(shortcut);
@@ -3600,6 +4282,18 @@ Enjoy your Windows 11 experience! 🎉</textarea>
                     pinnedApp.addEventListener('click', () => {
                         showSystemNotification(appName, `Launching ${appName}...`);
                         closeAllPanels();
+                        // Launch in Edge!
+                        const edgeApp = APPS.find(a => a.id === 'edge');
+                        if (edgeApp) {
+                            openApp(edgeApp);
+                            setTimeout(() => {
+                                const edgeInp = document.querySelector('.edge-url-input');
+                                if (edgeInp) {
+                                    edgeInp.value = customUrl;
+                                    edgeInp.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+                                }
+                            }, 500);
+                        }
                     });
                     document.getElementById('start-apps-grid').appendChild(pinnedApp);
 
@@ -3607,6 +4301,101 @@ Enjoy your Windows 11 experience! 🎉</textarea>
                 }, 1500);
             });
         });
+
+        // Custom App Installer form logic
+        const btnCustom = el.querySelector('.store-custom-btn');
+        if (btnCustom) {
+            btnCustom.addEventListener('click', () => {
+                const nameInput = el.querySelector('.store-custom-name');
+                const urlInput = el.querySelector('.store-custom-url');
+                const logoInput = el.querySelector('.store-custom-logo');
+
+                const name = nameInput.value.trim();
+                const url = urlInput.value.trim();
+                const logo = logoInput.value.trim() || "⭐";
+
+                if (!name || !url) {
+                    alert("Please provide at least App Name and App URL.");
+                    return;
+                }
+
+                btnCustom.textContent = "Publishing...";
+                btnCustom.disabled = true;
+
+                setTimeout(() => {
+                    btnCustom.textContent = "Install Custom App";
+                    btnCustom.disabled = false;
+
+                    // Clear inputs
+                    nameInput.value = '';
+                    urlInput.value = '';
+                    logoInput.value = '';
+
+                    // 1. Desktop shortcut creation
+                    const shortcut = document.createElement('div');
+                    shortcut.className = 'desktop-icon';
+                    if (logo.startsWith('http') || logo.startsWith('.') || logo.startsWith('/')) {
+                        shortcut.innerHTML = `<div class="icon" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;"><img src="${logo}" style="width:100%; height:100%; object-fit:contain;"></div><div class="label" style="font-size:11px; color:white; text-align:center;">${name}</div>`;
+                    } else {
+                        shortcut.innerHTML = `<div class="icon" style="font-size:36px; display:flex; align-items:center; justify-content:center;">${logo}</div><div class="label" style="font-size:11px; color:white; text-align:center;">${name}</div>`;
+                    }
+
+                    shortcut.addEventListener('dblclick', () => {
+                        showSystemNotification(name, `Launching ${name}...`);
+                        const edgeApp = APPS.find(a => a.id === 'edge');
+                        if (edgeApp) {
+                            openApp(edgeApp);
+                            setTimeout(() => {
+                                const edgeInp = document.querySelector('.edge-url-input');
+                                if (edgeInp) {
+                                    edgeInp.value = url;
+                                    edgeInp.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+                                }
+                            }, 500);
+                        }
+                    });
+                    document.getElementById('desktop-icons').appendChild(shortcut);
+
+                    // 2. Add to Start Menu apps grid
+                    const pinnedApp = document.createElement('div');
+                    pinnedApp.className = 'start-app-item';
+                    if (logo.startsWith('http') || logo.startsWith('.') || logo.startsWith('/')) {
+                        pinnedApp.innerHTML = `<div class="app-icon" style="width:24px; height:24px; display:flex; align-items:center; justify-content:center;"><img src="${logo}" style="width:100%; height:100%; object-fit:contain;"></div><div class="app-name">${name}</div>`;
+                    } else {
+                        pinnedApp.innerHTML = `<div class="app-icon">${logo}</div><div class="app-name">${name}</div>`;
+                    }
+                    pinnedApp.addEventListener('click', () => {
+                        showSystemNotification(name, `Launching ${name}...`);
+                        closeAllPanels();
+                        const edgeApp = APPS.find(a => a.id === 'edge');
+                        if (edgeApp) {
+                            openApp(edgeApp);
+                            setTimeout(() => {
+                                const edgeInp = document.querySelector('.edge-url-input');
+                                if (edgeInp) {
+                                    edgeInp.value = url;
+                                    edgeInp.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+                                }
+                            }, 500);
+                        }
+                    });
+                    document.getElementById('start-apps-grid').appendChild(pinnedApp);
+
+                    // Register custom app in global dynamic APPS array
+                    const newAppId = `custom-${Date.now()}`;
+                    APPS.push({
+                        id: newAppId,
+                        name: name,
+                        icon: logo.startsWith('http') ? '⭐' : logo,
+                        pinned: true,
+                        type: 'browser',
+                        customUrl: url
+                    });
+
+                    showSystemNotification("Microsoft Store", `Custom web application "${name}" successfully registered and pinned!`);
+                }, 1000);
+            });
+        }
     }
 
     function initCalendar(winId) {
@@ -4168,18 +4957,26 @@ Enjoy your Windows 11 experience! 🎉</textarea>
 
     // ===== INIT =====
     function init() {
-        bootSequence();
-        updateClock();
-        initDesktopIcons();
-        initStartMenu();
-        initSearch();
-        initTaskbar();
-        initWidgets();
-        initNotifications();
-        initContextMenu();
-        initPowerMenu();
-        initSelectionRect();
-        setTimeout(initTooltips, 100);
+        VFS.init().then(() => {
+            bootSequence();
+            updateClock();
+            initDesktopIcons();
+            initStartMenu();
+            initSearch();
+            initTaskbar();
+            initWidgets();
+            initNotifications();
+            initContextMenu();
+            initPowerMenu();
+            initSelectionRect();
+            setTimeout(initTooltips, 100);
+        }).catch(err => {
+            console.error("VFS Initialization Failed: ", err);
+            // Fallback boot
+            bootSequence();
+            updateClock();
+            initDesktopIcons();
+        });
     }
 
     init();
