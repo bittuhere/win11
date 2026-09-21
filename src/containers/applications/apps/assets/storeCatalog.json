@@ -1,0 +1,273 @@
+[
+  {
+    "id": "jspaint",
+    "name": "Paint",
+    "icon": "https://raw.githubusercontent.com/1j01/jspaint/master/images/icons/96x96.png",
+    "publisher": "Isaiah Odhner",
+    "type": "app",
+    "category": "Creativity",
+    "price": "Free",
+    "rating": 4.8,
+    "ratingsCount": 18420,
+    "data": {
+      "type": "IFrame",
+      "url": "https://jspaint.app",
+      "desc": "A faithful remake of Microsoft Paint that runs in the browser. Open, edit and save images without leaving WebOS.",
+      "feat": "Classic toolbox\nUndo history\nImage file support\nTransparent canvas",
+      "gallery": []
+    }
+  },
+  {
+    "id": "photopea",
+    "name": "Photopea",
+    "icon": "https://www.photopea.com/promo/icon512.png",
+    "publisher": "Ivan Kutskir",
+    "type": "app",
+    "category": "Creativity",
+    "price": "Free",
+    "rating": 4.7,
+    "ratingsCount": 90210,
+    "data": {
+      "type": "IFrame",
+      "url": "https://www.photopea.com",
+      "desc": "Advanced photo editor with PSD, XD, Sketch and more. Closest thing to Photoshop that runs in an iframe.",
+      "feat": "Layers\nSmart objects\nFilters\nExport PNG/JPG/PSD",
+      "gallery": []
+    }
+  },
+  {
+    "id": "excalidraw",
+    "name": "Excalidraw",
+    "icon": "https://excalidraw.com/apple-touch-icon.png",
+    "publisher": "Excalidraw",
+    "type": "app",
+    "category": "Productivity",
+    "price": "Free",
+    "rating": 4.9,
+    "ratingsCount": 22100,
+    "data": {
+      "type": "IFrame",
+      "url": "https://excalidraw.com",
+      "desc": "Virtual whiteboard for sketching hand-drawn like diagrams. Perfect for brainstorming.",
+      "feat": "Infinite canvas\nCollaboration ready\nExport SVG/PNG",
+      "gallery": []
+    }
+  },
+  {
+    "id": "vscode",
+    "name": "VS Code",
+    "icon": "https://code.visualstudio.com/favicon.ico",
+    "publisher": "Microsoft",
+    "type": "app",
+    "category": "Developer tools",
+    "price": "Free",
+    "rating": 4.9,
+    "ratingsCount": 150000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://vscode.dev",
+      "desc": "Visual Studio Code for the Web. Edit code with a real editor inside WebOS.",
+      "feat": "Extensions\nCommand palette\nGitHub repos",
+      "gallery": []
+    }
+  },
+  {
+    "id": "wikipedia",
+    "name": "Wikipedia",
+    "icon": "https://www.wikipedia.org/static/apple-touch/wikipedia.png",
+    "publisher": "Wikimedia",
+    "type": "app",
+    "category": "News & weather",
+    "price": "Free",
+    "rating": 4.6,
+    "ratingsCount": 88000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://www.wikipedia.org",
+      "desc": "The free encyclopedia. Read millions of articles without leaving the Store app window.",
+      "feat": "Search\nLanguages\nOffline-friendly reading",
+      "gallery": []
+    }
+  },
+  {
+    "id": "minecraft",
+    "name": "Minecraft Classic",
+    "icon": "img/icon/minecraft.png",
+    "publisher": "Mojang",
+    "type": "game",
+    "category": "Games",
+    "price": "Free",
+    "rating": 4.5,
+    "ratingsCount": 54000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://classic.minecraft.net",
+      "desc": "The original browser build of Minecraft. Place blocks, explore, create.",
+      "feat": "Creative world\nMultiplayer classic\nKeyboard + mouse",
+      "gallery": []
+    }
+  },
+  {
+    "id": "smashkarts",
+    "name": "Smash Karts",
+    "icon": "https://smashkarts.io/images/icon-512.png",
+    "publisher": "Tall Team",
+    "type": "game",
+    "category": "Games",
+    "price": "Free",
+    "rating": 4.4,
+    "ratingsCount": 31000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://smashkarts.io",
+      "desc": "Kart battle arena. Drive, grab weapons, blow up the competition.",
+      "feat": "Multiplayer\nPower-ups\nArenas",
+      "gallery": []
+    }
+  },
+  {
+    "id": "solitaire",
+    "name": "Solitaire",
+    "icon": "img/icon/soltaire.png",
+    "publisher": "WebOS",
+    "type": "game",
+    "category": "Games",
+    "price": "Free",
+    "rating": 4.3,
+    "ratingsCount": 12000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://www.squidbyte.com/games/spidersolitairewindowsxp",
+      "desc": "Classic Spider Solitaire. Deal, stack, clear the tableau.",
+      "feat": "Spider rules\nUndo\nWindows-era look",
+      "gallery": []
+    }
+  },
+  {
+    "id": "2048",
+    "name": "2048",
+    "icon": "https://play2048.co/favicon.ico",
+    "publisher": "Gabriele Cirulli",
+    "type": "game",
+    "category": "Games",
+    "price": "Free",
+    "rating": 4.6,
+    "ratingsCount": 67000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://play2048.co",
+      "desc": "Slide tiles, combine numbers, reach 2048. A quiet classic.",
+      "feat": "Keyboard controls\nScore tracking\nUndo",
+      "gallery": []
+    }
+  },
+  {
+    "id": "chess",
+    "name": "Chess",
+    "icon": "https://www.chess.com/favicon.ico",
+    "publisher": "Chess.com",
+    "type": "game",
+    "category": "Games",
+    "price": "Free",
+    "rating": 4.7,
+    "ratingsCount": 44000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://www.chess.com/play",
+      "desc": "Play chess against the computer or puzzles in your browser.",
+      "feat": "Puzzles\nPlay online\nLessons",
+      "gallery": []
+    }
+  },
+  {
+    "id": "krunker",
+    "name": "Krunker",
+    "icon": "https://krunker.io/img/newp.png",
+    "publisher": "Krunker.io",
+    "type": "game",
+    "category": "Games",
+    "price": "Free",
+    "rating": 4.2,
+    "ratingsCount": 28000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://krunker.io",
+      "invert": true,
+      "desc": "Fast pixelated first-person shooter that runs in the browser.",
+      "feat": "Multiplayer FPS\nClasses\nMaps",
+      "gallery": []
+    }
+  },
+  {
+    "id": "dino",
+    "name": "Edge Surf",
+    "icon": "img/icon/edge.png",
+    "publisher": "Microsoft",
+    "type": "game",
+    "category": "Games",
+    "price": "Free",
+    "rating": 4.1,
+    "ratingsCount": 9000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://chrome-dino-game.github.io/",
+      "desc": "The offline dinosaur runner. Jump, duck, survive.",
+      "feat": "Endless runner\nHigh score\nKeyboard",
+      "gallery": []
+    }
+  },
+  {
+    "id": "markdown",
+    "name": "StackEdit",
+    "icon": "https://stackedit.io/icon_192x192.png",
+    "publisher": "Benoit Schweblin",
+    "type": "app",
+    "category": "Productivity",
+    "price": "Free",
+    "rating": 4.5,
+    "ratingsCount": 7100,
+    "data": {
+      "type": "IFrame",
+      "url": "https://stackedit.io/app",
+      "desc": "In-browser Markdown editor with live preview.",
+      "feat": "Sync\nExport\nWYSIWYG",
+      "gallery": []
+    }
+  },
+  {
+    "id": "desmos",
+    "name": "Desmos",
+    "icon": "https://www.desmos.com/favicon.ico",
+    "publisher": "Desmos",
+    "type": "app",
+    "category": "Education",
+    "price": "Free",
+    "rating": 4.8,
+    "ratingsCount": 19000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://www.desmos.com/calculator",
+      "desc": "Graph functions, plot data and explore math.",
+      "feat": "Graphing calculator\nSliders\nTables",
+      "gallery": []
+    }
+  },
+  {
+    "id": "osm",
+    "name": "OpenStreetMap",
+    "icon": "img/icon/maps.png",
+    "publisher": "OSM Foundation",
+    "type": "app",
+    "category": "Travel",
+    "price": "Free",
+    "rating": 4.4,
+    "ratingsCount": 13000,
+    "data": {
+      "type": "IFrame",
+      "url": "https://www.openstreetmap.org/export/embed.html",
+      "desc": "The free wiki world map, embedded for quick lookup.",
+      "feat": "Pan and zoom\nWorldwide coverage",
+      "gallery": []
+    }
+  }
+]

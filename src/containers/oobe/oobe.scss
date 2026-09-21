@@ -1,0 +1,368 @@
+/* Windows 11 / Microsoft setup motion: fluent deceleration, no bounce */
+$fluent: cubic-bezier(0.16, 1, 0.3, 1);
+$fluent-out: cubic-bezier(0.33, 1, 0.68, 1);
+
+.oobe-root {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  overflow: hidden;
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  color: #fff;
+  user-select: none;
+}
+
+.oobe-blue {
+  background: #0067c0;
+  background: radial-gradient(120% 80% at 50% -10%, #3aa0ea 0%, #0067c0 42%, #004a8f 100%);
+}
+
+.oobe-mslogin {
+  background: #fff;
+  color: #1b1b1b;
+}
+
+.oobe-bloom {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 40% at 18% 88%, rgba(0, 120, 215, 0.35), transparent 70%),
+    radial-gradient(ellipse 40% 35% at 88% 12%, rgba(136, 84, 208, 0.22), transparent 70%),
+    radial-gradient(ellipse 30% 28% at 70% 80%, rgba(0, 153, 188, 0.18), transparent 70%);
+  animation: oobeBloom 18s $fluent-out infinite alternate;
+}
+
+@keyframes oobeBloom {
+  from { transform: scale(1) translate3d(0, 0, 0); opacity: 0.85; }
+  to { transform: scale(1.06) translate3d(-1.5%, 1%, 0); opacity: 1; }
+}
+
+.oobe-stage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.oobe-page {
+  width: min(720px, calc(100vw - 64px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: oobeIn 520ms $fluent both;
+}
+
+@keyframes oobeIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.oobe-page.leave {
+  animation: oobeOut 280ms $fluent-out both;
+}
+
+@keyframes oobeOut {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to { opacity: 0; transform: translate3d(0, -10px, 0); }
+}
+
+.win11-logo {
+  width: 88px;
+  height: 88px;
+  margin-bottom: 36px;
+}
+
+.win11-logo.sm {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 20px;
+}
+
+.oobe-kicker {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.78;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.oobe-title {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 14px;
+}
+
+.oobe-sub {
+  font-size: 15px;
+  line-height: 1.55;
+  opacity: 0.92;
+  max-width: 520px;
+  font-weight: 400;
+}
+
+.oobe-actions {
+  margin-top: 40px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.oobe-btn {
+  min-width: 118px;
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 160ms $fluent-out, border-color 160ms $fluent-out, color 160ms $fluent-out, opacity 160ms $fluent-out;
+}
+
+.oobe-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.oobe-btn.primary {
+  background: #fff;
+  color: #0067c0;
+  border-color: #fff;
+}
+.oobe-btn.primary:hover { background: #f3f8fd; }
+.oobe-btn.primary:active { background: #e6f1fb; }
+
+.oobe-btn.ghost {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+.oobe-btn.ghost:hover { background: rgba(255, 255, 255, 0.08); }
+
+.oobe-btn.accent {
+  background: #0067c0;
+  color: #fff;
+  border-color: #0067c0;
+}
+.oobe-btn.accent:hover { background: #005a9e; }
+.oobe-btn.accent:active { background: #004e8c; }
+.oobe-btn.accent:focus-visible { outline-color: #0067c0; }
+
+.oobe-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Info cards */
+.oobe-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: min(680px, 100%);
+  margin-top: 28px;
+  text-align: left;
+}
+
+.oobe-card {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 18px 18px 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: oobeIn 560ms $fluent both;
+}
+
+.oobe-card:nth-child(1) { animation-delay: 60ms; }
+.oobe-card:nth-child(2) { animation-delay: 140ms; }
+.oobe-card:nth-child(3) { animation-delay: 220ms; }
+.oobe-card:nth-child(4) { animation-delay: 300ms; }
+
+.oobe-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 8px 0 6px;
+}
+.oobe-card p {
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.9;
+  margin: 0;
+}
+.oobe-card .ico {
+  width: 28px;
+  height: 28px;
+}
+
+.oobe-lockhint {
+  margin-top: 14px;
+  font-size: 12px;
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+/* Microsoft account login card */
+.ms-wrap {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: #f2f2f2;
+  position: relative;
+}
+
+.ms-card {
+  width: min(440px, calc(100vw - 32px));
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  padding: 44px 44px 36px;
+  animation: oobeIn 480ms $fluent both;
+  text-align: left;
+  color: #1b1b1b;
+}
+
+.ms-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #5e5e5e;
+}
+
+.ms-squares {
+  width: 21px;
+  height: 21px;
+}
+
+.ms-card h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: #1b1b1b;
+}
+
+.ms-card .ms-desc {
+  font-size: 15px;
+  color: #616161;
+  margin-bottom: 22px;
+  line-height: 1.4;
+}
+
+.ms-field {
+  position: relative;
+  margin: 8px 0 20px;
+}
+
+.ms-field input {
+  width: 100%;
+  height: 36px;
+  border: none;
+  border-bottom: 1px solid #666;
+  background: transparent;
+  font-size: 15px;
+  padding: 4px 0 6px;
+  color: #1b1b1b;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.ms-field input:focus {
+  border-bottom: 2px solid #0067c0;
+  padding-bottom: 5px;
+}
+
+.ms-field input::placeholder {
+  color: #666;
+}
+
+.ms-error {
+  color: #c42b1c;
+  font-size: 12px;
+  margin-top: -12px;
+  margin-bottom: 14px;
+  min-height: 16px;
+}
+
+.ms-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+}
+
+.ms-footer {
+  position: absolute;
+  bottom: 16px;
+  right: 24px;
+  display: flex;
+  gap: 18px;
+  font-size: 12px;
+  color: #616161;
+}
+
+.ms-footer span { cursor: default; }
+
+/* Working / progress */
+.oobe-working .oobe-title {
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.oobe-ring {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 28px;
+}
+
+.progressRing circle {
+  stroke: white;
+  fill: none;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  transform-origin: 50% 50%;
+  animation: 2s linear 0s infinite normal none running spin-infinite;
+}
+
+.oobe-mslogin .progressRing circle {
+  stroke: #0067c0;
+}
+
+@keyframes spin-infinite {
+  0% { stroke-dasharray: 0.01px, 43.97px; transform: rotate(0deg); }
+  50% { stroke-dasharray: 21.99px, 21.99px; transform: rotate(450deg); }
+  100% { stroke-dasharray: 0.01px, 43.97px; transform: rotate(1080deg); }
+}
+
+.oobe-skip {
+  position: absolute;
+  bottom: 20px;
+  left: 24px;
+  font-size: 12px;
+  opacity: 0.55;
+  z-index: 2;
+}
+
+@media (max-width: 640px) {
+  .oobe-cards { grid-template-columns: 1fr; }
+  .oobe-title { font-size: 26px; }
+  .ms-card { padding: 28px 22px; }
+}
